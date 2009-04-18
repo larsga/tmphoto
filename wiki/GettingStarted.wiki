@@ -6,7 +6,7 @@ Unfortunately, setting up this application is quite tricky at the moment, becaus
 
 Note that if you don't have the OKS you might as well give up and go away now. Come back on July 1st.
 
-= Details =
+= Creating the topic map =
 
 First, you need to check out the source code from Subversion. Use the Source tab.
 
@@ -15,3 +15,7 @@ Then, install the OKS and Jython. Then, put oks-enterprise.jar and /path/to/desk
 From wherever, run the command `jython /path/to/desktop/tagger.py`. This will start the desktop tagging application. To import photos, choose File | Scan directory and pick a directory. All photos and videos in it will be added to the application. When done, choose File | Save, and a file metadata.xtm will be created in the current directory.
 
 To open the same topic map again, run `jython /path/to/desktop/tagger.py /path/to/metadata.xtm`.
+
+= Browsing photos =
+
+_more will follow once the source code is cleaned up and released_
