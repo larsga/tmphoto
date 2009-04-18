@@ -7,7 +7,7 @@ Unfortunately, setting up this application is quite tricky at the moment, becaus
 
 = Details =
 
-First, you need to install the OKS and Jython. Then, put oks-enterprise.jar on your classpath.
+First, you need to install the OKS and Jython. Then, put oks-enterprise.jar and /path/to/desktop/metadata-extractor-2.3.1.jar on your classpath.
 
 From wherever, run the command `jython /path/to/desktop/tagger.py`. This will start the desktop tagging application. To import photos, choose File | Scan directory and pick a directory. All photos and videos in it will be added to the application. When done, choose File | Save, and a file metadata.xtm will be created in the current directory.
 
