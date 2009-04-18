@@ -1,0 +1,14 @@
+#summary How to get started.
+
+= Introduction =
+
+Unfortunately, setting up this application is quite tricky at the moment, because of the rather clunky architecture. This page explains how to get started.
+
+
+= Details =
+
+First, you need to install the OKS and Jython. Then, put oks-enterprise.jar on your classpath.
+
+From wherever, run the command `jython /path/to/desktop/tagger.py`. This will start the desktop tagging application. To import photos, choose File | Scan directory and pick a directory. All photos and videos in it will be added to the application. When done, choose File | Save, and a file metadata.xtm will be created in the current directory.
+
+To open the same topic map again, run `jython /path/to/desktop/tagger.py /path/to/metadata.xtm`.
