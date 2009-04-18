@@ -70,12 +70,12 @@ from utils import *
 
 # --- Constants
 
-
 MAC = 1
 BASE = "http://psi.ontopia.net/tmphoto/"
 DC_BASE = "http://purl.org/dc/elements/1.1/"
 MD_BASE = "http://psi.ontopia.net/metadata/#"
 TECH_BASE = "http://www.techquila.com/psi/thesaurus/#"
+PATH = os.path.split(sys.argv[0])[0] # directory of this file, basically
 
 # --- TM access
 
@@ -1276,8 +1276,8 @@ class PhotoMetadataEditor:
         
     def _save(self):
         self._store()
-        os.system("cp metadata.xtm metadata.xtm.bak")
-        writer = ImportExportUtils.getWriter("metadata.xtm")
+        os.system('cp "%s" "%s.bak"' % (infile, infile))
+        writer = ImportExportUtils.getWriter(infile)
         writer.setVersion(1)
         writer.write(tm)
 
@@ -1575,7 +1575,7 @@ from net.ontopia.topicmaps.query.utils import QueryUtils
 if len(sys.argv) > 1:
     infile = sys.argv[1]
 else:
-    infile = "ontology.ltm"
+    infile = PATH + os.sep + "ontology.ltm"
 
 # --- Set globals
 
