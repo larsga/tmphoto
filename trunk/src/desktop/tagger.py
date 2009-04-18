@@ -1276,8 +1276,11 @@ class PhotoMetadataEditor:
         
     def _save(self):
         self._store()
-        os.system('cp "%s" "%s.bak"' % (infile, infile))
-        writer = ImportExportUtils.getWriter(infile)
+        if exists(outfile + ".bak"):
+            os.unlink(outfile + ".bak")
+        if exists(outfile):
+            os.rename(outfile, outfile + ".bak")
+        writer = ImportExportUtils.getWriter(outfile)
         writer.setVersion(1)
         writer.write(tm)
 
@@ -1574,8 +1577,10 @@ from net.ontopia.topicmaps.query.utils import QueryUtils
 
 if len(sys.argv) > 1:
     infile = sys.argv[1]
+    outfile = infile
 else:
     infile = PATH + os.sep + "ontology.ltm"
+    outfile = "metadata.xtm"
 
 # --- Set globals
 
