@@ -81,6 +81,7 @@ OP_BASE = "http://psi.ontopedia.net/"
 DC_BASE = "http://purl.org/dc/elements/1.1/"
 MD_BASE = "http://psi.ontopia.net/metadata/#"
 TECH_BASE = "http://www.techquila.com/psi/thesaurus/#"
+USERMAN = "http://psi.ontopia.net/userman/"
 PATH = os.path.split(sys.argv[0])[0] # directory of this file, basically
 
 PREFIXES = """
@@ -633,6 +634,8 @@ class PersonEditor(TopicTypeEditor):
         self._name = add_text_field(container, "Name")
         self._description = add_text_area(container, "Description")
         self._psi = add_text_field(container, "PSI")
+        self._username = add_text_field(container, "Username")
+        self._password = add_text_field(container, "Password")
 
         # partner
         gbc = get_gbc()
@@ -670,6 +673,8 @@ class PersonEditor(TopicTypeEditor):
             bind_name(self._name, topic),
             bind_psi(self._psi, topic),
             bind_occurrence(self._description, topic, desc),
+            bind_occurrence(self._username, topic, username),
+            bind_occurrence(self._password, topic, password),
             bind_association(self._partner, topic, partner_of, partner, partner, 1),
             bind_association(self._father, topic, father_of, child, parent, 1),
             bind_association(self._mother, topic, mother_of, child, parent, 1),
@@ -1539,6 +1544,8 @@ def set_globals(tm):
 
     latitude = get(BASE + "latitude")
     longitude = get(BASE + "longitude")
+    username = get(USERMAN + "username")
+    password = get(USERMAN + "password")
 
     for (var, val) in locals().items():
         globals()[var] = val
