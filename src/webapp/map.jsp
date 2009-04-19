@@ -58,8 +58,8 @@
     <tolog:when var="place">
       <tolog:if query="ph:latitude(%place%, $LAT),
                        ph:longitude(%place%, $LONG)?">
-        map.centerAndZoom(new GPoint(<tolog:out var="LAT"/>, 
-                                     <tolog:out var="LONG"/>), 8);
+        map.centerAndZoom(new GPoint(<tolog:out var="LONG"/>, 
+                                     <tolog:out var="LAT"/>), 8);
       </tolog:if>
     </tolog:when>
     <tolog:otherwise>
@@ -70,12 +70,12 @@
 
 
 <tolog:foreach query="
-  instance-of($PLACE, ph:location),
+  instance-of($PLACE, op:Place),
   ph:latitude($PLACE, $LAT),
   ph:longitude($PLACE, $LONG) order by $PLACE?">
   <script type="text/javascript">
-  add_place(<tolog:out var="LAT"/>,
-            <tolog:out var="LONG"/>,
+  add_place(<tolog:out var="LONG"/>,
+            <tolog:out var="LAT"/>,
             '<tolog:out var="PLACE"/>',
             '<tolog:id var="PLACE"/>',
             placeicon);
@@ -83,7 +83,7 @@
   <div style="display: none; font-family: Arial; font-size: 10pt; width: 200px" 
      id="<tolog:id var="PLACE"/>">
   <b><tolog:out var="PLACE"/></b><br>
-  <tolog:if var="occ:description(%PLACE%, $DESC)?">
+  <tolog:if var="dc:description(%PLACE%, $DESC)?">
     <tolog:out var="DESC"/><br>
   </tolog:if>
   <a href="place.jsp?id=<tolog:id var="PLACE"/>">Pictures</a>
