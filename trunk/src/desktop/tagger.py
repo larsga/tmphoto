@@ -1091,7 +1091,7 @@ class PhotoMetadataEditor:
         gbc = get_gbc()
         gbc.fill = GridBagConstraints.VERTICAL
         container.add(JLabel("Categories"), gbc)
-        self._categories = TopicList(PREFIXES + "ph:categorized(%topic% : ph:classified, $TOPIC : ph:classification)")
+        self._categories = TopicList(PREFIXES + "ph:in-category(%topic% : ph:categorized, $TOPIC : ph:categorization)")
         self._categories.setVisibleRowCount(10)
         scroll = JScrollPane(self._categories)
         scroll.setMinimumSize(Dimension(200, 50))
@@ -1527,9 +1527,9 @@ def set_globals(tm):
     child = get(BASE + "child")
 
     category = get(OP_BASE + "Category")
-    categorized = get(BASE + "categorized")
-    classified = get(BASE + "classified")
-    classification = get(BASE + "classification")
+    categorized = get(BASE + "in-category") #AT
+    classified = get(BASE + "categorized")  #RT
+    classification = get(BASE + "categorization") #RT
     is_processed = get(BASE + "is-processed")
     processed = get(BASE + "processed")
 
