@@ -39,10 +39,9 @@ op:located_in isa tmcl:association-type;
   - "Located in";
   - "Location of" @op:Containee.
 
-ph:categorized isa tmcl:association-type;
-  - "Categorization";
-  - "In category" @ph:classified;
-  - "Photos in" @ph:classification.
+ph:in-category isa tmcl:association-type;
+  - "In category";
+  - "Photos in" @ph:categorization.
 
 ph:hide isa tmcl:association-type;
   - "Hide". #note: unary association
@@ -113,10 +112,10 @@ op:Container isa tmcl:association-role-type;
 op:Containee isa tmcl:association-role-type;
   - "Containee".
 
-ph:classified isa tmcl:association-role-type;
-  - "Classified".
-ph:classification isa tmcl:association-role-type;
-  - "Classification".
+ph:categorized isa tmcl:association-role-type;
+  - "Categorized".
+ph:categorization isa tmcl:association-role-type;
+  - "Categorization".
 
 ph:hidden isa tmcl:association-role-type;
   - "Hidden".
