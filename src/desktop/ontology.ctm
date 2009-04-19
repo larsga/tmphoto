@@ -94,8 +94,6 @@ ph:latitude isa tmcl:occurrence-type;
   - "Latitude".
 ph:longitude isa tmcl:occurrence-type;
   - "Longitude".
-ph:longitude isa tmcl:occurrence-type;
-  - "Longitude".
 ph:vote-score isa tmcl:occurrence-type;
   - "Vote score".
 ph:duration isa tmcl:occurrence-type;
