@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE web-app
+          PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+          "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app>
+
+  <display-name>tmphoto</display-name>
+
+  <context-param>
+    <param-name>photo-server</param-name>
+    <param-value>http://localhost:8000/?</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>tmrap-server</param-name>
+    <param-value>http://localhost:6000/get-topic-page</param-value>
+  </context-param>
+  
+  <context-param>
+    <param-name>score_database</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <servlet>
+    <servlet-name>FrontController</servlet-name>
+    <display-name>FrontController</display-name>
+    <description>FrontController</description>
+    <servlet-class>
+      no.priv.garshol.topicmaps.tmphoto.FrontController
+    </servlet-class>
+  </servlet>
+
+  <!--servlet>
+    <servlet-name>LoadAveragesServlet</servlet-name>
+    <display-name>LoadAveragesServlet</display-name>
+    <description>LoadAveragesServlet</description>
+    <servlet-class>
+      no.priv.garshol.topicmaps.tmphoto.LoadAveragesServlet
+    </servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet-->
+  
+  <servlet-mapping>
+    <servlet-name>FrontController</servlet-name>
+    <url-pattern>/get-illustration</url-pattern>
+  </servlet-mapping>
+  
+  <session-config>
+    <session-timeout>300000</session-timeout>    
+  </session-config>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+</web-app>
