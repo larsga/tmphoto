@@ -1,3 +1,8 @@
+
+# WARNING: This source code is anything but clean. Prepare to have
+# your aesthethic sensibilities offended if you read anything below
+# this point.
+
 """
 Video support:
  - extend ontology.ltm & metadata.xtm DONE
@@ -71,11 +76,17 @@ from utils import *
 # --- Constants
 
 MAC = 1
-BASE = "http://psi.ontopia.net/tmphoto/"
+BASE = "http://psi.garshol.priv.no/tmphoto/"
+OP_BASE = "http://psi.ontopedia.net/"
 DC_BASE = "http://purl.org/dc/elements/1.1/"
 MD_BASE = "http://psi.ontopia.net/metadata/#"
 TECH_BASE = "http://www.techquila.com/psi/thesaurus/#"
 PATH = os.path.split(sys.argv[0])[0] # directory of this file, basically
+
+PREFIXES = """
+using op for i"http://psi.ontopedia.net/"
+using ph for i"http://psi.garshol.priv.no/tmphoto/"
+"""
 
 # --- TM access
 
@@ -151,7 +162,7 @@ class NameSynchronizer(AbstractSynchronizer):
         self._topic = topic
 
     def _create_object(self):
-        self._object = builder.makeTopicName(self._topic)
+        self._object = builder.makeTopicName(self._topic, "")
 
 class PSISynchronizer(AbstractSynchronizer):
 
@@ -610,7 +621,6 @@ class TopicTypeEditor(ListSelectionListener):
         for synchronizer in self._synchronizers:
             synchronizer.synchronize()
         
-        
 # --- Person editor
 
 class PersonEditor(TopicTypeEditor):
@@ -663,8 +673,8 @@ class PersonEditor(TopicTypeEditor):
             bind_association(self._partner, topic, partner_of, partner, partner, 1),
             bind_association(self._father, topic, father_of, child, parent, 1),
             bind_association(self._mother, topic, mother_of, child, parent, 1),
-            bind_unary(self._hide, topic, hide, photo)]
-        
+            bind_unary(self._hide, topic, hide, hidden)]
+
 # --- Place editor
 
 class PlaceEditor(TopicTypeEditor):
@@ -704,7 +714,7 @@ class PlaceEditor(TopicTypeEditor):
             bind_occurrence(self._latitude, topic, latitude),
             bind_occurrence(self._longitude, topic, longitude),
             bind_association(self._location, topic, contained_in, containee, container, 1),
-            bind_unary(self._hide, topic, hide, photo)]
+            bind_unary(self._hide, topic, hide, hidden)]
 
 # --- Event editor
 
@@ -729,7 +739,7 @@ class EventEditor(TopicTypeEditor):
             bind_occurrence(self._start_date, topic, start_date),
             bind_occurrence(self._end_date, topic, end_date),
             bind_unary(self._is_processed, topic, is_processed, processed),
-            bind_unary(self._hide, topic, hide, photo),
+            bind_unary(self._hide, topic, hide, hidden),
             bind_psi(self._psi, topic)]
 
 # --- Category editor
@@ -885,9 +895,9 @@ class PhotoOrganizer:
         container.add(JScrollPane(table), gbc)
 
         # set up listeners
-        self._location.addItemListener(ItemSelectionListener(table, photo, taken_at, location, self._location))
-        self._event.addItemListener(ItemSelectionListener(table, photo, taken_during, event, self._event))
-        
+        self._location.addItemListener(ItemSelectionListener(table, image, taken_at, location, self._location))
+        self._event.addItemListener(ItemSelectionListener(table, image, taken_during, event, self._event))
+
         # make visible
         top.pack()
         top.setVisible(1)
@@ -910,13 +920,14 @@ class PhotoTableModel(AbstractTableModel):
     
     def __init__(self):
         photos = []
-        result = processor.execute("""select $PHOTO, $NAME, $TIME, $PLACE, $EVENT, $LOC from
-                                      instance-of($PHOTO, image),
+        result = processor.execute(PREFIXES +
+                                   """select $PHOTO, $NAME, $TIME, $PLACE, $EVENT, $LOC from
+                                      instance-of($PHOTO, op:Image),
                                       topic-name($PHOTO, $TNAME),
                                       value($TNAME, $NAME),
-                                      { lastmod($PHOTO, $TIME) },
-                                      { taken-at($PHOTO : photo, $PLACE : location) },
-                                      { taken-during($PHOTO : photo, $EVENT : event) },
+                                      { ph:time-taken($PHOTO, $TIME) },
+                                      { ph:taken-at($PHOTO : op:Photo, $PLACE : op:Place) },
+                                      { ph:taken-during($PHOTO : op:Image, $EVENT : op:Event) },
                                       subject-locator($PHOTO, $LOC)
                                       order by $TIME, $LOC?""")
         while result.next():
@@ -1042,7 +1053,7 @@ class PhotoMetadataEditor:
         gbc = get_gbc()
         gbc.fill = GridBagConstraints.VERTICAL
         container.add(JLabel("People"), gbc)
-        self._person = TopicList("depicted-in(%topic% : photo, $TOPIC : object)")
+        self._person = TopicList(PREFIXES + "ph:depicted-in(%topic% : ph:depiction, $TOPIC : ph:depicted)")
         self._person.setVisibleRowCount(10)
         scroll = JScrollPane(self._person)
         scroll.setMinimumSize(Dimension(200, 50))
@@ -1052,10 +1063,10 @@ class PhotoMetadataEditor:
         remove = JButton("-")
         remove.addActionListener(TopicRemoveListener(self._person,
                                                      depicted_in,
-                                                     photo,
-                                                     object))
+                                                     depiction,
+                                                     depicted))
         self._personlistener = CreateAssociationListener(top, person,
-                                                         depicted_in, photo, object,
+                                                         depicted_in, depiction, depicted,
                                                          self._person,
                                                          [top.pack])
         add.addActionListener(self._personlistener)
@@ -1080,7 +1091,7 @@ class PhotoMetadataEditor:
         gbc = get_gbc()
         gbc.fill = GridBagConstraints.VERTICAL
         container.add(JLabel("Categories"), gbc)
-        self._categories = TopicList("categorized(%topic% : classified, $TOPIC : classification)")
+        self._categories = TopicList(PREFIXES + "ph:categorized(%topic% : ph:classified, $TOPIC : ph:classification)")
         self._categories.setVisibleRowCount(10)
         scroll = JScrollPane(self._categories)
         scroll.setMinimumSize(Dimension(200, 50))
@@ -1255,10 +1266,10 @@ class PhotoMetadataEditor:
         self._synchronizers = [
             bind_name(self._title, topic),
             bind_occurrence(self._description, topic, desc),
-            bind_occurrence(self._time, topic, lastmod),
-            bind_association(self._location, topic, taken_at, photo, location, 1),
-            bind_association(self._event, topic, taken_during, photo, event, 1),
-            bind_unary(self._hide, topic, hide, photo)]
+            bind_occurrence(self._time, topic, time_taken),
+            bind_association(self._location, topic, taken_at, image, location, 1),
+            bind_association(self._event, topic, taken_during, image, event, 1),
+            bind_unary(self._hide, topic, hide, hidden)]
 
         self._person.setSelectedItem(topic)
         self._personlistener.setCurrentTopic(topic)
@@ -1459,8 +1470,9 @@ def get_image_topics(tm):
     processor = QueryUtils.getQueryProcessor(tm)
     
     topics = []
-    result = processor.execute("""instance-of($PHOTO, image),
-                                  { lastmod($PHOTO, $TIME) },
+    result = processor.execute(PREFIXES +
+                               """instance-of($PHOTO, op:Image),
+                                  { ph:time-taken($PHOTO, $TIME) },
                                   subject-locator($PHOTO, $LOC)
                                   order by $TIME, $LOC?""")
     while result.next():
@@ -1469,56 +1481,65 @@ def get_image_topics(tm):
     return topics
 
 def set_globals(tm):
+    def get(uri):
+        topic = tm.getTopicBySubjectIdentifier(URILocator(uri))
+        if not topic:
+            print "No topic for", uri
+            sys.exit(1)
+        return topic
+    
     DuplicateSuppressionUtils.removeDuplicates(tm)
     strify = TopicStringifiers.getDefaultStringifier().toString
     builder = tm.getTransaction().getBuilder()
     processor = QueryUtils.getQueryProcessor(tm)
 
-    photo = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#photo"))
-    video = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#video"))
-    taken_at = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#taken-at"))
-    lastmod = tm.getTopicBySubjectIdentifier(URILocator("http://psi.ontopia.net/xtm/occurrence-type/last-modified-at"))
-    resolution = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#resolution"))
-    desc = tm.getTopicBySubjectIdentifier(URILocator("http://psi.ontopia.net/xtm/occurrence-type/description"))
-    location = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#location"))
-    object = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#object"))
-    person = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#person"))
-    event = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#event"))
-    depicted_in = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#depicted-in"))
-    taken_during = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#taken-during"))
-    contained_in = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#contained-in"))
-    containee = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#containee"))
-    container = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#container"))
-    hide = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#hide"))
-    start_date = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#start-date"))
-    end_date = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#end-date"))
+    image = get(OP_BASE + "Image")
+    photo = get(OP_BASE + "Photo")
+    video = get(OP_BASE + "Video")
+    taken_at = get(BASE + "taken-at")
+    time_taken = get(BASE + "time-taken")
+    desc = get(DC_BASE + "description")
+    location = get(OP_BASE + "Place")
+    person = get(OP_BASE + "Person")
+    event = get(OP_BASE + "Event")
+    depicted_in = get(BASE + "depicted-in")
+    depicted = get(BASE + "depicted")
+    depiction = get(BASE + "depiction")
+    taken_during = get(BASE + "taken-during")
+    contained_in = get(OP_BASE + "located_in")
+    containee = get(OP_BASE + "Containee")
+    container = get(OP_BASE + "Container")
+    hide = get(BASE + "hide")
+    hidden = get(BASE + "hidden")
+    start_date = get(BASE + "start-date")
+    end_date = get(BASE + "end-date")
 
-    creator = tm.getTopicBySubjectIdentifier(URILocator(DC_BASE + "creator"))
-    resource = tm.getTopicBySubjectIdentifier(URILocator(MD_BASE + "resource"))
-    value = tm.getTopicBySubjectIdentifier(URILocator(MD_BASE + "value"))
+    creator = get(DC_BASE + "creator")
+    resource = get(MD_BASE + "resource")
+    value = get(MD_BASE + "value")
 
-    partner_of = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#partner-of"))
-    partner = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#partner"))
+    partner_of = get(BASE + "partnership")
+    partner = get(BASE + "partner")
 
-    mother_of = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#mother-of"))
-    father_of = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#father-of"))
-    parent = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#parent"))
-    child = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#child"))
+    mother_of = get(BASE + "motherhood")
+    father_of = get(BASE + "fatherhood")
+    parent = get(BASE + "parent")
+    child = get(BASE + "child")
 
-    category = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#category"))
-    categorized = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#categorized"))
-    classified = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#classified"))
-    classification = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#classification"))
-    is_processed = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#is-processed"))
-    processed = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#processed"))
+    category = get(OP_BASE + "Category")
+    categorized = get(BASE + "categorized")
+    classified = get(BASE + "classified")
+    classification = get(BASE + "classification")
+    is_processed = get(BASE + "is-processed")
+    processed = get(BASE + "processed")
 
-    broader_narrower = tm.getTopicBySubjectIdentifier(URILocator(TECH_BASE + "broader-narrower"))
-    narrower = tm.getTopicBySubjectIdentifier(URILocator(TECH_BASE + "narrower"))
-    broader = tm.getTopicBySubjectIdentifier(URILocator(TECH_BASE + "broader"))
+    broader_narrower = get(TECH_BASE + "broader-narrower")
+    narrower = get(TECH_BASE + "narrower")
+    broader = get(TECH_BASE + "broader")
 
-    latitude = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#latitude"))
-    longitude = tm.getTopicBySubjectIdentifier(URILocator(BASE + "#longitude"))
-    
+    latitude = get(BASE + "latitude")
+    longitude = get(BASE + "longitude")
+
     for (var, val) in locals().items():
         globals()[var] = val
 
@@ -1557,7 +1578,7 @@ def scan(directory, the_event):
         #print metadata["Make"] + ", " + metadata["Model"]
         #print metadata["Date/Time"]
         builder.makeTopicName(topic, os.path.split(file)[1])
-        builder.makeOccurrence(topic, lastmod, metadata["Date/Time"])
+        builder.makeOccurrence(topic, time_taken, metadata["Date/Time"])
         # FIXME: add duration!
 
         if the_event:
@@ -1579,7 +1600,7 @@ if len(sys.argv) > 1:
     infile = sys.argv[1]
     outfile = infile
 else:
-    infile = PATH + os.sep + "ontology.ltm"
+    infile = PATH + os.sep + "ontology.ctm"
     outfile = "metadata.xtm"
 
 # --- Set globals
