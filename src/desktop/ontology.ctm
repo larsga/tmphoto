@@ -4,9 +4,15 @@
 %prefix dc http://purl.org/dc/elements/1.1/
 %prefix dcc http://psi.ontopia.net/metadata/#
 %prefix userman http://psi.ontopia.net/userman/
+%prefix thes http://www.techquila.com/psi/thesaurus/#
+%prefix tmdm http://psi.topicmaps.org/iso13250/model/
+%prefix xtm http://www.topicmaps.org/xtm/1.0/core.xtm#
 
 # ===== TMPHOTO SYSTEM ONTOLOGY
 # Version x.x - 2009-0x-xx
+# This is the system ontology for the tmphoto application. This file is used
+# to seed new topic maps in tagger.py.
+# http://code.google.com/p/tmphoto/
 
 # ----- TOPIC TYPES
 op:Image isa tmcl:topic-type; - "Image".
@@ -46,10 +52,10 @@ ph:is-processed isa tmcl:association-type;
 
 ph:taken-during isa tmcl:association-type;
   - "Photo/event";
-  - "Taken during" @op:Photo;
+  - "Taken during" @op:Image;
   - "Photos taken during" @ op:Event.
 
-dc:Creator isa tmcl:association-type;
+dc:creator isa tmcl:association-type;
   - "Creator";
   - "Creator of" @ dcc:value.
 
@@ -67,10 +73,15 @@ ph:partnership isa tmcl:association-type;
   - "Partnership";
   - "Partner of" @ph:partner.
 
+thes:broader-narrower isa tmcl:association-type;
+  - "Broader/narrower";
+  - "Narrower than" @thes:narrower;
+  - "Broader than" @thes:broader.
+
 # ----- OCCURRENCE TYPES
 
 ph:time-taken isa tmcl:occurrence-type;
-  - "Time taken". # ie: when the photo was taken
+  - "Time taken". # ie: when the image was taken
 
 dc:description isa tmcl:occurrence-type;
   - "Description".
@@ -127,3 +138,15 @@ ph:child isa tmcl:association-role-type;
 
 ph:partner isa tmcl:association-role-type;
   - "Partner".
+
+thes:broader isa tmcl:association-role-type;
+  - "Broader".
+thes:narrower isa tmcl:association-role-type;
+  - "Narrower".
+
+# HACK
+# we merge the XTM and TMDM subtyping associations
+
+tmdm:supertype-subtype xtm:superclass-subclass.
+tmdm:supertype xtm:superclass.
+tmdm:subtype xtm:subclass.
