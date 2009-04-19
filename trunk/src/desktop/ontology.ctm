@@ -1,0 +1,129 @@
+%prefix op http://psi.ontopedia.net/
+%prefix ph http://psi.garshol.priv.no/tmphoto/
+%prefix tmcl http://dunno.yet
+%prefix dc http://purl.org/dc/elements/1.1/
+%prefix dcc http://psi.ontopia.net/metadata/#
+%prefix userman http://psi.ontopia.net/userman/
+
+# ===== TMPHOTO SYSTEM ONTOLOGY
+# Version x.x - 2009-0x-xx
+
+# ----- TOPIC TYPES
+op:Image isa tmcl:topic-type; - "Image".
+  op:Photo ako op:Image; - "Photo".
+  op:Video ako op:Image; - "Video".
+op:Place isa tmcl:topic-type; - "Place".
+op:Person isa tmcl:topic-type; - "Person".
+op:Event isa tmcl:topic-type; - "Event".
+op:Category isa tmcl:topic-type; - "Category".
+
+# ----- ASSOCIATION TYPES
+
+ph:taken-at isa tmcl:association-type;
+  - "Photo/location";
+  - "Taken at" @op:Image;
+  - "Photos taken at" @op:Place.
+
+ph:depicted-in isa tmcl:association-type;
+  - "Depicted in photo";
+  - "Depicted in" @ph:depicted;
+  - "Depicts" @ph:depiction.
+
+op:located_in isa tmcl:association-type;
+  - "Located in";
+  - "Location of" @op:Containee.
+
+ph:categorized isa tmcl:association-type;
+  - "Categorization";
+  - "In category" @ph:classified;
+  - "Photos in" @ph:classification.
+
+ph:hide isa tmcl:association-type;
+  - "Hide". #note: unary association
+
+ph:is-processed isa tmcl:association-type;
+  - "Is processed". #note: unary association
+
+ph:taken-during isa tmcl:association-type;
+  - "Photo/event";
+  - "Taken during" @op:Photo;
+  - "Photos taken during" @ op:Event.
+
+dc:Creator isa tmcl:association-type;
+  - "Creator";
+  - "Creator of" @ dcc:value.
+
+ph:fatherhood isa tmcl:association-type;
+  - "Fatherhood";
+  - "Father" @ ph:child;
+  - "Father of" @ ph:parent.
+
+ph:motherhood isa tmcl:association-type;
+  - "Motherhood";
+  - "Mother" @ ph:child;
+  - "Mother of" @ ph:parent.
+
+ph:partnership isa tmcl:association-type;
+  - "Partnership";
+  - "Partner of" @ph:partner.
+
+# ----- OCCURRENCE TYPES
+
+ph:time-taken isa tmcl:occurrence-type;
+  - "Time taken". # ie: when the photo was taken
+
+dc:description isa tmcl:occurrence-type;
+  - "Description".
+
+ph:start-date isa tmcl:occurrence-type;
+  - "Start date".
+ph:end-date isa tmcl:occurrence-type;
+  - "End date".
+ph:latitude isa tmcl:occurrence-type;
+  - "Latitude".
+ph:longitude isa tmcl:occurrence-type;
+  - "Longitude".
+ph:longitude isa tmcl:occurrence-type;
+  - "Longitude".
+ph:vote-score isa tmcl:occurrence-type;
+  - "Vote score".
+ph:duration isa tmcl:occurrence-type;
+  - "Duration".
+userman:password isa tmcl:occurrence-type;
+  - "Password".
+
+# ----- ROLE TYPES
+
+ph:depiction isa tmcl:association-role-type;
+  - "Depiction".
+ph:depicted isa tmcl:association-role-type;
+  - "Depicted".
+
+op:Container isa tmcl:association-role-type;
+  - "Container".
+op:Containee isa tmcl:association-role-type;
+  - "Containee".
+
+ph:classified isa tmcl:association-role-type;
+  - "Classified".
+ph:classification isa tmcl:association-role-type;
+  - "Classification".
+
+ph:hidden isa tmcl:association-role-type;
+  - "Hidden".
+
+ph:processed isa tmcl:association-role-type;
+  - "Processed".
+
+dcc:value isa tmcl:association-role-type;
+  - "Value".
+dcc:resource isa tmcl:association-role-type;
+  - "Resource".
+
+ph:parent isa tmcl:association-role-type;
+  - "Parent".
+ph:child isa tmcl:association-role-type;
+  - "Child".
+
+ph:partner isa tmcl:association-role-type;
+  - "Partner".
