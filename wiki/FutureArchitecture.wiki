@@ -1,0 +1,21 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+This is a description of how to simplify [Architecture the current architecture] to make tmphoto easier to use for non-experts. Three steps are suggested.
+
+= Step 1: Get rid of photoserv =
+
+We implement an ImageServlet which runs in the same web application as tmphoto itself. This ImageServlet receives a topic id, finds the image file on disk, and then behaves exactly like photoserv, using ImageMagick to scale the file and caching scaled files on disk. Implementing this should be very easy.
+
+= Step 2: Get rid of ImageMagick =
+
+We improve ImageServlet so that it does the image scaling itself, without calling ImageMagick on the command-line. To do this it's necessary to come up with some suitable pure-Java library for image scaling with reasonable performance. Whether this exists remains to be seen.
+
+= Step 3: Get rid of tagger.py =
+
+The final step is to extend the web application so that the entire topic map can be maintained from it. This requires either integrating Ontopoly (via the proposed JavaScript protocol) or developing a custom editor. The main challenge is to find a way to scan local directories from the web application.
+
+= Conclusion =
+
+After these three steps it should be possible to distribute tmphoto as a simple .war file. Installation means simply dropping it into Tomcat and running.
