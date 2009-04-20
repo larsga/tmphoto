@@ -8,6 +8,8 @@ The tmphoto application consists of four major components:
   * photoserv.py - image server which scales photos on demand (Python, WSGI)
   * scripts - various scripts for handling routine tasks
 
+This makes the software difficult to set up, and effectively unusable for non-developers. The architecture must therefore be simplified, as described in FutureArchitecture.
+
 = tagger.py =
 
 A desktop Swing application written in Jython based on the OKS. Imports photos from disk, lets the user describe them, and also lets the user edit people, places, events, and categories. Reads the topic map from file and saves it back to XTM.
