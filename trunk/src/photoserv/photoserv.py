@@ -263,7 +263,7 @@ def photo_app(environ, start_response):
     photo = index.get_photo(id)
     if not photo:
         start_response("404 Not found", [])
-        return [""]
+        return ["No such image"]
     
     if size == "metadata":
         return output_metadata(photo.get_filename(), start_response)
