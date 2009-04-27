@@ -157,7 +157,7 @@ Photos from <tolog:out var="place"/>
 
     // the place icon
     var placeicon = new GIcon();
-    placeicon.image = 'http://www.garshol.priv.no/tmphoto/images/blue-dot.gif';
+    placeicon.image = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
     placeicon.iconSize = new GSize(12, 12);
     placeicon.iconAnchor = new GPoint(5, 5);
     placeicon.infoWindowAnchor = new GPoint(9, 2);
@@ -165,7 +165,7 @@ Photos from <tolog:out var="place"/>
 
     // the highlighted place icon
     var blueicon = new GIcon();
-    blueicon.image = 'http://www.garshol.priv.no/tmphoto/images/green-dot.gif';
+    blueicon.image = 'http://www.garshol.priv.no/tmphoto/resources/green-dot.gif';
     blueicon.iconSize = new GSize(12, 12);
     blueicon.iconAnchor = new GPoint(5, 5);
     blueicon.infoWindowAnchor = new GPoint(9, 2);
