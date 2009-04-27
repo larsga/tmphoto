@@ -425,7 +425,7 @@ class AbstracTopicListComponent:
     def getTopic(self):
         topic = None
         
-        result = processor.execute("""
+        result = processor.execute(PREFIXES + """
           select $TOPIC from
           %s, topic-name($TOPIC, $TN),
           value($TN, "%s")?""" % (self._query, self.getSelectedString()),
@@ -440,7 +440,7 @@ class AbstracTopicListComponent:
     def getTopics(self):
         topics = []
         for string in self.getSelectedStrings():
-            result = processor.execute("""
+            result = processor.execute(PREFIXES + """
               select $TOPIC from
               %s, topic-name($TOPIC, $TN),
               value($TN, "%s")?""" % (self._query, string), self._params)
@@ -459,7 +459,8 @@ class AbstracTopicListComponent:
         model.removeAllElements()
         model.addElement("")
 
-        result = processor.execute("%s order by $TOPIC?" % self._query,
+        result = processor.execute(PREFIXES +
+                                   "%s order by $TOPIC?" % self._query,
                                    self._params)
         while result.next():
             model.addElement(strify(result.getValue(0)))
@@ -1058,7 +1059,7 @@ class PhotoMetadataEditor:
         gbc = get_gbc()
         gbc.fill = GridBagConstraints.VERTICAL
         container.add(JLabel("People"), gbc)
-        self._person = TopicList(PREFIXES + "ph:depicted-in(%topic% : ph:depiction, $TOPIC : ph:depicted)")
+        self._person = TopicList("ph:depicted-in(%topic% : ph:depiction, $TOPIC : ph:depicted)")
         self._person.setVisibleRowCount(10)
         scroll = JScrollPane(self._person)
         scroll.setMinimumSize(Dimension(200, 50))
@@ -1096,7 +1097,7 @@ class PhotoMetadataEditor:
         gbc = get_gbc()
         gbc.fill = GridBagConstraints.VERTICAL
         container.add(JLabel("Categories"), gbc)
-        self._categories = TopicList(PREFIXES + "ph:in-category(%topic% : ph:categorized, $TOPIC : ph:categorization)")
+        self._categories = TopicList("ph:in-category(%topic% : ph:categorized, $TOPIC : ph:categorization)")
         self._categories.setVisibleRowCount(10)
         scroll = JScrollPane(self._categories)
         scroll.setMinimumSize(Dimension(200, 50))
