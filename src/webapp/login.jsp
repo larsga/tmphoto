@@ -3,6 +3,7 @@
 <%@ include file="tolog.jsp"%>
 <%@ include file="handleuser.jsp"%>
 <%
+  // avoid caching
   response.setHeader("Cache-control", "no-cache");
 %>
 
