@@ -2,6 +2,9 @@
 <tolog:context topicmap="metadata.xtm">
 <%@ include file="tolog.jsp"%>
 <%
+  // avoid caching
+  response.setHeader("Cache-control", "no-cache");
+
  // build user registry
  Map pws = new HashMap();
 %>
