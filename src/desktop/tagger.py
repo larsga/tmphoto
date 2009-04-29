@@ -1591,7 +1591,7 @@ def scan(directory, the_event):
 
         if the_event:
             assoc = builder.makeAssociation(taken_during)
-            builder.makeAssociationRole(assoc, photo, topic)
+            builder.makeAssociationRole(assoc, image, topic)
             builder.makeAssociationRole(assoc, event, the_event)
 
         # create SHA1 occurrence?
