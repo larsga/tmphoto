@@ -298,7 +298,7 @@ def bind_unary(checkbox, topic, assoctype, roletype):
 
 # --- Topic chooser
 
-from java.awt.event import ActionListener, ItemListener, ItemEvent
+from java.awt.event import ActionListener, ItemListener, ItemEvent, WindowListener
 from java.awt.event import KeyEvent, ActionEvent
 from javax.swing import KeyStroke
 
@@ -1032,6 +1032,7 @@ class CreateAssociationListener(ActionListener):
 class PhotoMetadataEditor:
 
     def __init__(self, images):
+        global top
         top = JFrame("TMPhoto")
         top.getContentPane().setLayout(BorderLayout())
 
@@ -1193,8 +1194,9 @@ class PhotoMetadataEditor:
         top.setJMenuBar(menubar)
         
         top.pack()
-        top.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-        top.setVisible(1)       
+        top.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE)
+        top.setVisible(1)
+        top.addWindowListener(CloseListener())
 
         self._top = top
         self._panel = panel
@@ -1358,8 +1360,7 @@ class PhotoMetadataEditor:
             image.remove()
 
     def _exit(self):
-        if yesnobox(self._top, "Are you sure you want to quit?"):
-            sys.exit(1)
+        confirm_and_exit()
 
     def _copy_from_previous(self):
         # 1: get topic for this photo
@@ -1424,6 +1425,24 @@ def get_by_type(list, type):
     for obj in list:
         if obj.getType() == desc:
             return obj
+
+class CloseListener(WindowListener):
+
+    def windowActivated(self, e):
+        pass
+
+    def windowOpened(self, e):
+        pass
+    
+    def windowClosing(self, e):
+        confirm_and_exit()
+
+    def windowDeactivated(self, e):
+        pass
+        
+def confirm_and_exit():
+    if yesnobox(top, "Are you sure you want to quit?"):
+        sys.exit(1)
 
 # --- Helpers
 
