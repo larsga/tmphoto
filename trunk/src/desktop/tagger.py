@@ -932,7 +932,7 @@ class PhotoTableModel(AbstractTableModel):
                                       topic-name($PHOTO, $TNAME),
                                       value($TNAME, $NAME),
                                       { ph:time-taken($PHOTO, $TIME) },
-                                      { ph:taken-at($PHOTO : op:Photo, $PLACE : op:Place) },
+                                      { ph:taken-at($PHOTO : op:Image, $PLACE : op:Place) },
                                       { ph:taken-during($PHOTO : op:Image, $EVENT : op:Event) },
                                       subject-locator($PHOTO, $LOC)
                                       order by $TIME, $LOC?""")
