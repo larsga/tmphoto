@@ -70,13 +70,13 @@
 <tolog:set var="photo" query="<%= query %>"/>
 
 <tolog:query name="check">
-  occ:last-modified-at(%photo%, $TIME),
-  ph:taken-at(%photo% : ph:photo, $PLACE : ph:location)
+  ph:time-taken(%photo%, $TIME),
+  ph:taken-at(%photo% : op:Image, $PLACE : op:Place)
   <tolog:if var="nouser">,
-  not(ph:hide(%photo% : ph:photo)),
-  not(ph:hide($PLACE : ph:photo)),
-  not(ph:depicted-in(%photo% : ph:photo, $PERSON : ph:object),
-      ph:hide($PERSON : ph:photo))
+  not(ph:hide(%photo% : ph:hidden)),
+  not(ph:hide($PLACE : ph:hidden)),
+  not(ph:depicted-in(%photo% : ph:depiction, $PERSON : ph:depicted),
+      ph:hide($PERSON : ph:hidden))
   </tolog:if>?
 </tolog:query>
 <tolog:if query="check">
@@ -86,7 +86,7 @@
 <td valign=top><span style="font-size: 75%"><tolog:out var="photo"/><br>
 
 <a href="place.jsp?id=<tolog:id var="PLACE"/>"><tolog:out var="PLACE"/></a><br>
-<tolog:out query="occ:last-modified-at(%photo%, $DATE)?"/><br>
+<tolog:out query="ph:time-taken(%photo%, $DATE)?"/><br>
 Score: <c:out value="${photodata.score}"/><br>
 </tolog:if>
 
