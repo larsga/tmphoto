@@ -22,7 +22,7 @@
   TopicMapBuilderIF builder = tm.getBuilder();
   LocatorIF base = tm.getStore().getBaseAddress();
 
-  LocatorIF psi = base.resolveAbsolute("http://psi.ontopia.net/tmphoto/#vote-score");
+  LocatorIF psi = base.resolveAbsolute("http://psi.garshol.priv.no/tmphoto/vote-score");
   TopicIF scoret = tm.getTopicBySubjectIdentifier(psi);
 
   LocatorIF datatype = PSI.getXSDDecimal();
