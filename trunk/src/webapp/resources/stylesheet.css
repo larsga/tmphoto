@@ -52,3 +52,11 @@ tr.unprocessed td a:link {
 tr.unprocessed td a:visited {
   color: #AAA;
 }
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}

@@ -11,6 +11,7 @@
   </link>
   <meta http-equiv="content-type" content="text/html; charset=utf-8"></meta>
   <template:get name="headertags"/>
+  <script type="text/javascript" src="resources/swap.js"></script>
 </head>
 
 <body <template:get name="bodyattrs"/>>
