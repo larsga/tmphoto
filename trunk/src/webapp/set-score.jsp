@@ -27,8 +27,9 @@
 
   LocatorIF datatype = PSI.getXSDDecimal();
 
+  // FIXME: move this into ScoreManager and use a constant!
   int votes = ScoreManager.getVoteCount(id);
-  double thescore = (ScoreManager.getAverageScore(id)*votes + 3) / (votes+1);
+  double thescore = (ScoreManager.getAverageScore(id)*votes + 2.5) / (votes+1);
 
   LocatorIF itemid = base.resolveAbsolute('#' + id);
   TopicIF photo = (TopicIF) tm.getObjectByItemIdentifier(itemid);
