@@ -185,28 +185,13 @@
 --%>
 
 <!-- FILTERS -->
-<script>
-function swap(id) {
-  var elem = document.getElementById("f" + id);
-  var link = document.getElementById("link" + id);
-  var text = link.childNodes[0];
-  if (elem.style.display == "none") {
-    elem.style.display = "table-cell";    
-    text.data = "-";
-  } else {
-    elem.style.display = "none";
-    text.data = "+";
-  }
-}
-</script>
-
 <c:forEach items="${list.filters}" var="filter">
 <table width="100%" class=filterbox><tr><td>
 <p><b>Filter by <tolog:out var="filter.type"/></b></p>
 <td align=right><a href="javascript:swap('<tolog:oid var="filter.type"/>')"
                   ><b id="link<tolog:oid var="filter.type"/>">+</b></a>
 
-<tr><td colspan=2 style="display: none" 
+<tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
 <c:forEach items="${filter.topics}" var="counter">
@@ -216,6 +201,7 @@ function swap(id) {
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
+</div>
 </table>
 </c:forEach>
 
