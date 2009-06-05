@@ -36,15 +36,15 @@
 <tr><td>
 
 <tolog:set var="query">
-  occ:last-modified-at($PHOTO, $TIME),
+  ph:time-taken($PHOTO, $TIME),
   str:starts-with($TIME, %month%),
-  ph:taken-at($PHOTO : ph:photo, $PLACE : ph:location)
+  ph:taken-at($PHOTO : op:Image, $PLACE : op:Place)
   <tolog:if var="nouser">
   ,
-  not(ph:hide($PHOTO : ph:photo)),
-  not(ph:hide($PLACE : ph:photo)),
-  not(ph:depicted-in($PHOTO : ph:photo, $PERSON : ph:object),
-      ph:hide($PERSON : ph:photo))
+  not(ph:hide($PHOTO : ph:hidden)),
+  not(ph:hide($PLACE : ph:hidden)),
+  not(ph:depicted-in($PHOTO : ph:depiction, $PERSON : ph:depicted),
+      ph:hide($PERSON : ph:hidden))
   </tolog:if>
 </tolog:set>
 
@@ -101,10 +101,10 @@
 <a href="photo.jsp?id=<tolog:id var="photo"/>"><img src="<%= pageContext.getServletContext().getInitParameter("photo-server") %><tolog:id var="photo"/>;thumb" border="0"></a>
 
 <td valign=top><span style="font-size: 75%"><tolog:out var="photo"/><br>
-<tolog:if query="ph:taken-at($PLACE : ph:location, %photo% : ph:photo)?">
+<tolog:if query="ph:taken-at($PLACE : op:Place, %photo% : op:Image)?">
   <a href="place.jsp?id=<tolog:id var="PLACE"/>"><tolog:out var="PLACE"/></a><br>
 </tolog:if>
-<tolog:out query="occ:last-modified-at(%photo%, $DATE)?"/><br>
+<tolog:out query="ph:time-taken(%photo%, $DATE)?"/><br>
 
 </c:forEach>
 </table>
@@ -114,21 +114,6 @@
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <td>
 <!-- FILTERS -->
-<script>
-function swap(id) {
-  var elem = document.getElementById("f" + id);
-  var link = document.getElementById("link" + id);
-  var text = link.childNodes[0];
-  if (elem.style.display == "none") {
-    elem.style.display = "table-cell";    
-    text.data = "-";
-  } else {
-    elem.style.display = "none";
-    text.data = "+";
-  }
-}
-</script>
-
 <c:forEach items="${list.filters}" var="filter">
 <table width="100%" class=filterbox><tr><td>
 <p><b>Filter by <tolog:out var="filter.type"/></b></p>
