@@ -92,7 +92,7 @@
   String query = (String) ContextUtils.getSingleValue("query", pageContext);
   String sort;
   if (sortby.equals("time"))
-    sort = "$TIME";
+    sort = "$TIME desc";
   else
     sort = "$AVG desc";
   FilteredList list = new FilteredList(pageContext, query, sort, "PHOTO",
