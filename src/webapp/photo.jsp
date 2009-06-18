@@ -199,27 +199,16 @@ order by $DATE limit 1?
 <%
   String id = request.getParameter("id");
   String scoreurl = "";
+  double average = 0;
+  int votes = 0;
   if (has_comments) {
-    double average = ScoreManager.getAverageScore(id);
-    int votes = ScoreManager.getVoteCount(id);
+    average = ScoreManager.getAverageScore(id);
+    votes = ScoreManager.getVoteCount(id);
 %>
 <span title="Average vote, out of <%= votes %> votes is <%= average %>">
 <%
-  int stars = 0;
-  while (average > 0) {
-    if (average > 0.9) {
-      stars++; %>
-      <img src="resources/red-star.png">    
-<%    average -= 1.0;
-    } else if (average > 0.1) {
-      stars++; %>
-      <img src="resources/half-red-star.png">
-<%    average = 0;
-    } else
-      average = 0;
-  } 
-  for (; stars < 5; stars++) { %>
-    <img src="resources/gray-star.png">
+  for (int stars = 0; stars < 5; stars++) { %>
+    <img id=avgstar<%= stars %> src="resources/gray-star.png">
 <%}%>
 </span>
     
@@ -286,10 +275,36 @@ order by $DATE limit 1?
 
 <script>
 <% if (has_comments) { %>
+  var votes = <%= votes %>;
+  var average = <%= average %>;
   var userscore = <%= ScoreManager.getScore(id, (username != null ? username : "nobody")) %>;
 <% } else { %>
   var userscore = 0.0;
 <% } %>
+  var photoid = "<tolog:id var="photo"/>";
+
+function set_average_stars(avg) {
+  var stars = 0;
+  while (avg > 0) {
+    if (avg > 0.9) {
+      set_average_star(stars, "red");
+      stars++;
+      avg -= 1.0;
+    } else if (avg > 0.1) {
+      set_average_star(stars, "half-red");
+      stars++;
+      avg = 0;
+    } else
+      avg = 0;
+  } 
+  for (; stars < 5; stars++) {
+    set_average_star(stars, "gray");
+  }
+}
+function set_average_star(ix, color) {
+  img = document.getElementById("avgstar" + ix);
+  img.src = "resources/" + color + "-star.png"; 
+}
 
 function setstars(start, end, type) {
   for (var ix = start; ix <= end; ix++) {
@@ -306,9 +321,23 @@ function moveoff(number) {
   setstars(userscore + 1, 5, "white");
 }
 function vote(number) {
-  form = document.forms["voteform"];
-  form.score.value = number;
-  form.submit();
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("POST", "set-score.jsp?id=" + photoid + "&score=" + number, false);
+  xmlhttp.send();
+  if (xmlhttp.readyState == 4 &&
+      xmlhttp.status == 200) {
+    if (userscore == 0) {
+      average = ((average * votes) + number) / (votes + 1);
+      votes = votes + 1;
+      userscore = number;
+    } else {
+      average = ((average * votes) + number - userscore) / votes;
+      userscore = number;
+    }
+    set_average_stars(average);
+  } else {
+    alert("Problem: " + xmlhttp.readyState + ", " + xmlhttp.status);
+  }
 }
 </script>
 
@@ -320,7 +349,7 @@ function confirmDelete() {
 </template:put>
 
 <template:put name="bodyattrs">
-onload="moveoff(0)"
+onload="moveoff(0); set_average_stars(average)"
 </template:put>
 
 <tolog:if var="place">
