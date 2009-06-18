@@ -3,9 +3,6 @@
   String id = request.getParameter("id");
   if (id == null)
     throw new NullPointerException("Photo ID must be given!");
-  String referrer = request.getHeader("Referer");
-  if (referrer == null)
-    referrer = "photo.jsp?id=" + id;
   int score = Integer.parseInt(request.getParameter("score"));
   if (score < 1 || score > 5)
     throw new RuntimeException("Score must be between 1 and 5!");
@@ -47,5 +44,5 @@
     occ.setValue("" + thescore);
 
   // finished!
-  response.sendRedirect(referrer);
+  // no longer sending referrer, since we are using XMLHttpRequest
 %>
