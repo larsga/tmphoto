@@ -91,6 +91,9 @@ using ph for i"http://psi.garshol.priv.no/tmphoto/"
 
 # --- TM access
 
+def get_first(iterable):
+    return iterable.iterator().next()
+
 def get_name(topic):
     names = topic.getTopicNames()
     if not names.isEmpty():
@@ -389,7 +392,7 @@ class ImagePanel(JPanel):
         self.setImage(ImageIO.read(File(tmp)))
 
     def render_image(self, topic):
-        url = topic.getSubjectLocators()[0].getAddress()
+        url = get_first(topic.getSubjectLocators()).getAddress()
         filename = url[6 : ]
         extension = filename[-3 : ].lower()
 
@@ -1247,7 +1250,7 @@ class PhotoMetadataEditor:
 
     def _delete(self):
         if yesnobox(self._top, "Are you sure you want to delete this photo?"):
-            os.unlink(self._images[self._current].getSubjectLocators()[0].getAddress()[6 : ])
+            os.unlink(get_first(self._images[self._current].getSubjectLocators()).getAddress()[6 : ])
             self._images[self._current].remove()
             del self._images[self._current]
             if self._current == 0:
@@ -1283,7 +1286,7 @@ class PhotoMetadataEditor:
         self._personlistener.setCurrentTopic(topic)
         self._categories.setSelectedItem(topic)
         self._catlistener.setCurrentTopic(topic)
-        self._filename.setText(topic.getSubjectLocators()[0].getAddress()[6 : ])
+        self._filename.setText(get_first(topic.getSubjectLocators()).getAddress()[6 : ])
 
     def _photo_list(self):
         self._store()
@@ -1314,7 +1317,7 @@ class PhotoMetadataEditor:
 
     def _open_in_app(self, app = None):
         topic = self._images[self._current]
-        filename = topic.getSubjectLocators()[0].getAddress()[6 : ]
+        filename = get_first(topic.getSubjectLocators()).getAddress()[6 : ]
         if app:
             os.system('open -a %s "%s"' % (app, filename))
         else:
@@ -1329,7 +1332,7 @@ class PhotoMetadataEditor:
 
     def _rotate(self, degrees):
         topic = self._images[self._current]
-        filename = topic.getSubjectLocators()[0].getAddress()[6 : ]
+        filename = get_first(topic.getSubjectLocators()).getAddress()[6 : ]
         tmp = "/tmp/rotated.jpg"
         os.system('convert -rotate %s "%s" "%s"' % (degrees, filename, tmp))
         os.system('mv "%s" "%s"' % (tmp, filename))
@@ -1351,7 +1354,7 @@ class PhotoMetadataEditor:
     def _prune(self):
         remove = []
         for image in self._images:
-            fname = image.getSubjectLocators()[0].getAddress()[6 : ]
+            fname = get_first(image.getSubjectLocators()).getAddress()[6 : ]
             if not exists(fname):
                 remove.append(image)
 
