@@ -8,7 +8,7 @@ Unfortunately, setting up this application is quite tricky at the moment, becaus
 
 First, you need to check out the source code from Subversion. Use the Source tab.
 
-Then, install the OKS and Jython. Then, put oks-enterprise.jar and /path/to/desktop/metadata-extractor-2.3.1.jar on your classpath.
+Then, install [http://code.google.com/p/ontopia/ Ontopia] and Jython. Then, put ontopia.jar and /path/to/desktop/metadata-extractor-2.3.1.jar on your classpath.
 
 From wherever, run the command `jython /path/to/desktop/tagger.py`. This will start the desktop tagging application. To import photos, choose File | Scan directory and pick a directory. All photos and videos in it will be added to the application. When done, choose File | Save, and a file metadata.xtm will be created in the current directory.
 
@@ -16,6 +16,6 @@ To open the same topic map again, run `jython /path/to/desktop/tagger.py /path/t
 
 = Browsing photos =
 
-Copy src/webapp to apache-tomcat/webapps in your OKS installation, and name the application tmphoto. Put metadata.xtm somewhere where the application will find it. You should now be able to start the application and browse through it.
+Copy src/webapp to apache-tomcat/webapps in your Ontopia installation, and name the application tmphoto. Put metadata.xtm somewhere where the application will find it. You should now be able to start the application and browse through it.
 
 However, no photos will show up. To solve that run the tool that makes the photo index (*not yet checked in*) and put the resulting index.txt in src/photoserv. Then start the photo server with `python photoserv.py 7000`. Provided you have ImageMagick installed (the command called "convert") everything should now work.
