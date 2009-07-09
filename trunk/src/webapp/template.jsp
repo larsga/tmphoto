@@ -48,8 +48,8 @@
 <hr>
 
 <address>
-tmphoto app built with 
-<a href="http://www.ontopia.net/solutions/products.html">OKS</a>.
+<a href="http://code.google.com/p/tmphoto/">tmphoto</a> app built with 
+<a href="http://www.ontopia.net">Ontopia</a>.
 <%
   Object username = session.getAttribute("username");
   if (username != null) {
