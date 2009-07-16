@@ -9,7 +9,8 @@
 
   <context-param>
     <param-name>photo-server</param-name>
-    <param-value>http://localhost:8000/?</param-value>
+    <!--param-value>http://localhost:8000/?</param-value-->
+    <param-value>get-image?</param-value>
   </context-param>
 
   <context-param>
@@ -31,6 +32,14 @@
     </servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>ImageServlet</servlet-name>
+    <display-name>ImageServlet</display-name>
+    <servlet-class>
+      no.priv.garshol.topicmaps.tmphoto.ImageServlet
+    </servlet-class>
+  </servlet>
+  
   <!--servlet>
     <servlet-name>LoadAveragesServlet</servlet-name>
     <display-name>LoadAveragesServlet</display-name>
@@ -44,6 +53,11 @@
   <servlet-mapping>
     <servlet-name>FrontController</servlet-name>
     <url-pattern>/get-illustration</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ImageServlet</servlet-name>
+    <url-pattern>/get-image</url-pattern>
   </servlet-mapping>
   
   <session-config>
