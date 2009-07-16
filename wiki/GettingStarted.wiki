@@ -17,5 +17,3 @@ To open the same topic map again, run `jython /path/to/desktop/tagger.py /path/t
 = Browsing photos =
 
 Copy src/webapp to apache-tomcat/webapps in your Ontopia installation, and name the application tmphoto. Put metadata.xtm somewhere where the application will find it. You should now be able to start the application and browse through it.
-
-However, no photos will show up. To solve that run the tool that makes the photo index (*not yet checked in*) and put the resulting index.txt in src/photoserv. Then start the photo server with `python photoserv.py 7000`. Provided you have ImageMagick installed (the command called "convert") everything should now work.
