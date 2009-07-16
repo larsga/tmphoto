@@ -27,8 +27,9 @@ import net.ontopia.topicmaps.nav2.utils.NavigatorUtils;
  * the corresponding scaled image. 
  */
 public class ImageServlet extends HttpServlet {
-
-  final static private String CACHEDIR = getCacheDir(); 
+  final static private int MAX_WORKERS = 2;
+  final static private String CACHEDIR = getCacheDir();
+  static private int active_workers = 0;
   
   protected void doGet(HttpServletRequest req,
                        HttpServletResponse resp)
@@ -51,8 +52,11 @@ public class ImageServlet extends HttpServlet {
     resp.setIntHeader("Content-length", (int) scaledfile.length());
     OutputStream out = resp.getOutputStream();
     FileInputStream in = new FileInputStream(scaledfile);
-    StreamUtils.transfer(in, out);
-    in.close();
+    try {
+      StreamUtils.transfer(in, out);
+    } finally {
+      in.close();
+    }
     out.flush();
   }
   
@@ -70,6 +74,34 @@ public class ImageServlet extends HttpServlet {
   }
 
   private static void scaleImage(File source, File destination, int maxside) {
+    while (!canRun()) {
+      try {
+        Thread.sleep(25);
+      } catch (InterruptedException e) {
+      }
+    }
+
+    try {
+      increment();
+      scaleImage_(source, destination, maxside);
+    } finally {
+      decrement();
+    }
+  }
+
+  private static synchronized boolean canRun() {
+    return active_workers < MAX_WORKERS;
+  }
+
+  private static synchronized void increment() {
+    active_workers++;
+  }
+
+  private static synchronized void decrement() {
+    active_workers--;
+  }
+
+  private static void scaleImage_(File source, File destination, int maxside) {
     RenderedImage src = JAI.create("fileload", source.getPath());
     RenderedImage scaled = src;
 
