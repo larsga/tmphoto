@@ -212,9 +212,6 @@ order by $DATE limit 1?
 <%}%>
 </span>
     
-<% } else
-    scoreurl = "http://www.garshol.priv.no/tmphoto/";
-%>
 &nbsp;&nbsp;&nbsp;
 <span title="Please record your vote. 1 star is bad, 3 is average, 5 is really good">
 <form method=post action="<%= scoreurl %>set-score.jsp" style="display: inline"
@@ -233,6 +230,7 @@ order by $DATE limit 1?
      onmouseover="moveonto(5)" onmouseout="moveoff(5)" onclick="vote(5)">
 </form>
 </span>
+<% } // end of if has_comments %>
 
 <br>
 <tolog:choose>
@@ -278,9 +276,6 @@ order by $DATE limit 1?
   var votes = <%= votes %>;
   var average = <%= average %>;
   var userscore = <%= ScoreManager.getScore(id, (username != null ? username : "nobody")) %>;
-<% } else { %>
-  var userscore = 0.0;
-<% } %>
   var photoid = "<tolog:id var="photo"/>";
 
 function set_average_stars(avg) {
@@ -340,6 +335,7 @@ function vote(number) {
   }
 }
 </script>
+<% } %>
 
 <script>
 function confirmDelete() {
