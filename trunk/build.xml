@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<project name="tmphoto" default="jar.tmphoto" basedir=".">
+
+  <target name="init">
+    <!-- Compiler properties -->
+    <property name="build.compiler" value="modern" />
+
+    <!-- Build directories -->
+    <property name="build.root" value="${basedir}/build" />
+    <property name="build.classes" value="${build.root}/classes" />
+    <property name="build.jars" value="${build.root}/jars" />
+    <property name="build.dist" value="${build.root}/tmphoto" />
+  </target>
+
+  <!-- Patterns -->
+  <patternset id="sources.tmphoto">
+    <include name="src/java/no/priv/garshol/topicmaps/tmphoto/*.java" />
+  </patternset>
+
+  <patternset id="classes.tmphoto">
+    <include name="no/priv/garshol/topicmaps/tmphoto/*.class" />
+  </patternset>
+
+  <target name="compile.tmphoto" depends="init">
+    <echo>Compiling tmphoto classes...</echo>
+    <mkdir dir="${build.classes}"/>
+    <javac srcdir="${basedir}" destdir="${build.classes}"
+           debug="yes" debuglevel="source,lines,vars">
+      <patternset refid="sources.tmphoto" />
+    </javac>
+  </target>
+
+  <target name="clean.tmphoto" depends="init">
+    <echo>Cleaning tmphoto classes...</echo>
+    <delete>
+      <fileset dir="${build.classes}">
+        <patternset refid="classes.tmphoto" />
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="jar.tmphoto" depends="init">
+    <echo>Creating tmphoto jar file...</echo>
+    <mkdir dir="${build.jars}"/>
+    <delete file="${build.jars}/tmphoto.jar" />
+    <jar basedir="${build.classes}" jarfile="${build.jars}/tmphoto.jar">
+      <patternset refid="classes.tmphoto"/>
+    </jar>
+  </target>
+
+  <target name="deploy.tmphoto" depends="init">
+    <echo>Uploading tmphoto jar file...</echo>
+    <exec executable="scp">
+      <arg value="${build.jars}/tmphoto.jar"/>
+      <arg value="garshol.virtual.vps-host.net:/opt/tomcat5/webapps/tmphoto/WEB-INF/lib"/>
+    </exec>
+  </target>
+
+  <target name="dist.tmphoto" depends="init">
+    <echo>Building distribution</echo>
+    <mkdir dir="${build.dist}"/>
+
+    <!-- tagger app -->
+    <mkdir dir="${build.dist}/tagger"/>
+    <copy todir="${build.dist}/tagger" overwrite="yes">
+      <fileset dir="src/desktop">
+        <patternset>
+          <include name="*.py" />
+          <include name="ontology.ctm" />
+        </patternset>
+      </fileset>
+    </copy>
+
+    <!-- webapp as .war -->
+    <mkdir dir="${build.dist}/tmphoto"/>
+    <copy todir="${build.dist}/webapp" overwrite="yes">
+      <fileset dir="src/webapp">
+        <patternset>
+          <include name="**" />
+        </patternset>
+      </fileset>
+    </copy>
+    
+    <!-- FIXME: should have a README -->
+    <!-- FIXME: bundle necessary .jars
+           - move metadata-ext to a lib directory
+           - check licensing
+    -->
+  </target>
+</project>
