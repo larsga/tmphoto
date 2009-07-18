@@ -141,7 +141,12 @@ def get_topic_by_id(tm, id):
     base = tm.getStore().getBaseAddress()
     srcloc = base.resolveAbsolute("#" + id)
     return tm.getObjectByItemIdentifier(srcloc)
-        
+
+def has_instances(topic_type):
+    tm = topic_type.getTopicMap()
+    ix = tm.getIndex("net.ontopia.topicmaps.core.index.ClassInstanceIndexIF")
+    return not ix.getTopics(topic_type).isEmpty()
+
 # --- Data binding
 
 class AbstractSynchronizer:
@@ -1339,9 +1344,11 @@ class PhotoMetadataEditor:
         self.refresh(1, 1)
         
     def _scan_directory(self):
-        the_event = choose_topic(self._top, event)
-        if the_event:
-            the_event = the_event[0]
+        the_event = None
+        if has_instances(event):
+            the_event = choose_topic(self._top, event)
+            if the_event:
+                the_event = the_event[0]
         
         dir = choose_directory(self._top)
         if dir:
