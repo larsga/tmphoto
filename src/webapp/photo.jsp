@@ -271,8 +271,8 @@ order by $DATE limit 1?
 
 </table>
 
-<script>
 <% if (has_comments) { %>
+<script>
   var votes = <%= votes %>;
   var average = <%= average %>;
   var userscore = <%= ScoreManager.getScore(id, (username != null ? username : "nobody")) %>;
