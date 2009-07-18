@@ -18,7 +18,7 @@ Requires ImageMagick for rotating photos, and a bundled Java library for reading
 
 = tmphoto =
 
-The actual browsing application, written in JSP using the OKS. Has no other dependencies. However, it does not serve the photos themselves. Instead, it produces HTML that says `<img src="<PREFIX><ID>">` without caring what *PREFIX* may be. In practice, *PREFIX* should point to an instance of photoserv.py.
+The actual browsing application, written in JSP using the OKS. By default it serves not just the browsing interface, but also the photos themselves. It can be configured to use the photo server (see below) instead.
 
 = photoserv.py =
 
