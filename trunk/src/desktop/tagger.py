@@ -29,12 +29,7 @@ Copy from previous:
  - improve so we don't get multiple values where only one is allowed
 
 Next:
- - removing people from list of depicteds
  - filtering photos by event (in list of photos)
-
- - publishing as a menu item
-   - settable max resolution
- - get rid of OOM error
  - things depicted in pictures (buildings, objects, etc)
  - simple search support
 
