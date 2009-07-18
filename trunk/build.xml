@@ -101,6 +101,8 @@
         </patternset>
       </fileset>
     </copy>
+    <copy file="${build.jars}/tmphoto.jar"
+          tofile="${build.dist}/tmphoto/WEB-INF/lib/tmphoto.jar" />
     <war warfile="${build.dist}/tmphoto.war"
          webxml="src/webapp/WEB-INF/web.xml">
       <fileset dir="${build.dist}/tmphoto" />
@@ -109,8 +111,8 @@
 
     <!-- package -->
     <zip destFile="${build.root}/tmphoto.zip" duplicate="preserve"> 
-      <zipfileset dir="${build.dist}" 
-        includes="**"/>
+      <zipfileset dir="${build.root}" 
+        includes="tmphoto/**"/>
     </zip>
     
   </target>
