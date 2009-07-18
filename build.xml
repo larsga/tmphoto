@@ -58,8 +58,12 @@
 
   <target name="dist.tmphoto" depends="init">
     <echo>Building distribution</echo>
+    <delete dir="${build.dist}"/>
     <mkdir dir="${build.dist}"/>
 
+    <copy file="doc/README.txt"
+          tofile="${build.dist}/README.txt" />
+    
     <!-- tagger app -->
     <mkdir dir="${build.dist}/tagger"/>
     <copy todir="${build.dist}/tagger" overwrite="yes">
@@ -70,21 +74,44 @@
         </patternset>
       </fileset>
     </copy>
-
-    <!-- webapp as .war -->
-    <mkdir dir="${build.dist}/tmphoto"/>
-    <copy todir="${build.dist}/webapp" overwrite="yes">
-      <fileset dir="src/webapp">
+    <mkdir dir="${build.dist}/lib"/>
+    <copy todir="${build.dist}/lib" overwrite="yes">
+      <fileset dir="lib">
         <patternset>
-          <include name="**" />
+          <include name="metadata-extractor*.jar" />
         </patternset>
       </fileset>
     </copy>
+
+    <!-- webapp as .war -->
+    <mkdir dir="${build.dist}/tmphoto"/>
+    <copy todir="${build.dist}/tmphoto" overwrite="yes">
+      <fileset dir="src/webapp">
+        <patternset>
+          <include name="**" />
+          <exclude name="lib"/>
+        </patternset>
+      </fileset>
+    </copy>
+    <mkdir dir="${build.dist}/tmphoto/WEB-INF/lib"/>
+    <copy todir="${build.dist}/tmphoto/WEB-INF/lib" overwrite="yes">
+      <fileset dir="lib">
+        <patternset>
+          <include name="*.jar" />
+        </patternset>
+      </fileset>
+    </copy>
+    <war warfile="${build.dist}/tmphoto.war"
+         webxml="src/webapp/WEB-INF/web.xml">
+      <fileset dir="${build.dist}/tmphoto" />
+    </war>
+    <delete dir="${build.dist}/tmphoto"/>
+
+    <!-- package -->
+    <zip destFile="${build.root}/tmphoto.zip" duplicate="preserve"> 
+      <zipfileset dir="${build.dist}" 
+        includes="**"/>
+    </zip>
     
-    <!-- FIXME: should have a README -->
-    <!-- FIXME: bundle necessary .jars
-           - move metadata-ext to a lib directory
-           - check licensing
-    -->
   </target>
 </project>
