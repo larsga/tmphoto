@@ -1,6 +1,8 @@
 
 package no.priv.garshol.topicmaps.tmphoto;
 
+// FIXME: is source newer than scaled?
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,8 +13,8 @@ import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import java.awt.image.RenderedImage;
 import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
 import javax.media.jai.Interpolation;
 
 import net.ontopia.utils.StreamUtils;
@@ -102,8 +104,8 @@ public class ImageServlet extends HttpServlet {
   }
 
   private static void scaleImage_(File source, File destination, int maxside) {
-    RenderedImage src = JAI.create("fileload", source.getPath());
-    RenderedImage scaled = src;
+    RenderedOp src = JAI.create("fileload", source.getPath());
+    RenderedOp scaled = src;
 
     int biggest = Math.max(src.getHeight(), src.getWidth());
     float scale = maxside / (float) biggest;
@@ -111,7 +113,13 @@ public class ImageServlet extends HttpServlet {
       scaled = JAI.create("scale", src, scale, scale, 0, 0,
                         Interpolation.getInstance(Interpolation.INTERP_BILINEAR));
 
-    JAI.create("filestore", scaled, destination.getPath(), "JPEG", null);
+    RenderedOp saved = 
+      JAI.create("filestore", scaled, destination.getPath(), "JPEG", null);
+
+    src.dispose();
+    if (scaled != src)
+      scaled.dispose();
+    saved.dispose();
   }
 
   private static int getMaxSide(String size) {
