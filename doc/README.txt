@@ -2,7 +2,7 @@
   tmphoto
 ===========
 
-Version:  0.1b1
+Version:  0.1a1
 Homepage: http://code.google.com/p/tmphoto/
 
 
