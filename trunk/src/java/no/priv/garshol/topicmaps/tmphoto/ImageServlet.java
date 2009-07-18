@@ -1,8 +1,6 @@
 
 package no.priv.garshol.topicmaps.tmphoto;
 
-// FIXME: is source newer than scaled?
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,12 +8,9 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.Interpolation;
 
 import net.ontopia.utils.StreamUtils;
 import net.ontopia.infoset.core.LocatorIF;
@@ -23,6 +18,8 @@ import net.ontopia.topicmaps.core.*;
 import net.ontopia.topicmaps.entry.TopicMapReferenceIF;
 import net.ontopia.topicmaps.entry.TopicMapRepositoryIF;
 import net.ontopia.topicmaps.nav2.utils.NavigatorUtils;
+
+import no.priv.garshol.topicmaps.tmphoto.images.*;
 
 /**
  * Receives a request of the form tmphoto/image?id;size and returns
@@ -32,6 +29,12 @@ public class ImageServlet extends HttpServlet {
   final static private int MAX_WORKERS = 2;
   final static private String CACHEDIR = getCacheDir();
   static private int active_workers = 0;
+  private ImageProcessor improc;
+
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    improc = new JAIProcessor(); // FIXME: make this configurable
+  }
   
   protected void doGet(HttpServletRequest req,
                        HttpServletResponse resp)
@@ -64,18 +67,20 @@ public class ImageServlet extends HttpServlet {
   
   // --- Internal helpers
 
-  private static File getScaledFile(String id, String origfile, String size) {
+  private File getScaledFile(String id, String origfile, String size)
+    throws IOException {
     if (size.equals("full"))
       return new File(origfile);
 
-    File scaledfile = new File(CACHEDIR + size + File.separator + id);
+    File scaledfile = new File(CACHEDIR + size + File.separator + id + ".jpg");
     if (!scaledfile.exists())
       scaleImage(new File(origfile), scaledfile, getMaxSide(size));
     
     return scaledfile;
   }
 
-  private static void scaleImage(File source, File destination, int maxside) {
+  private void scaleImage(File source, File destination, int maxside)
+    throws IOException {
     while (!canRun()) {
       try {
         Thread.sleep(25);
@@ -85,7 +90,7 @@ public class ImageServlet extends HttpServlet {
 
     try {
       increment();
-      scaleImage_(source, destination, maxside);
+      improc.scaleImage(source, destination, maxside);
     } finally {
       decrement();
     }
@@ -101,25 +106,6 @@ public class ImageServlet extends HttpServlet {
 
   private static synchronized void decrement() {
     active_workers--;
-  }
-
-  private static void scaleImage_(File source, File destination, int maxside) {
-    RenderedOp src = JAI.create("fileload", source.getPath());
-    RenderedOp scaled = src;
-
-    int biggest = Math.max(src.getHeight(), src.getWidth());
-    float scale = maxside / (float) biggest;
-    if (scale < 1.0)
-      scaled = JAI.create("scale", src, scale, scale, 0, 0,
-                        Interpolation.getInstance(Interpolation.INTERP_BILINEAR));
-
-    RenderedOp saved = 
-      JAI.create("filestore", scaled, destination.getPath(), "JPEG", null);
-
-    src.dispose();
-    if (scaled != src)
-      scaled.dispose();
-    saved.dispose();
   }
 
   private static int getMaxSide(String size) {

@@ -15,10 +15,12 @@
   <!-- Patterns -->
   <patternset id="sources.tmphoto">
     <include name="src/java/no/priv/garshol/topicmaps/tmphoto/*.java" />
+    <include name="src/java/no/priv/garshol/topicmaps/tmphoto/images/*.java" />
   </patternset>
 
   <patternset id="classes.tmphoto">
     <include name="no/priv/garshol/topicmaps/tmphoto/*.class" />
+    <include name="no/priv/garshol/topicmaps/tmphoto/images/*.class" />
   </patternset>
 
   <target name="compile.tmphoto" depends="init">
