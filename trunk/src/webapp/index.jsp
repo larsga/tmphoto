@@ -52,8 +52,10 @@ You can access the photos through lists of:
     <td><tolog:out query="select count($T) from instance-of($T, op:Event)?"/>
 <tr><th><a href="categories.jsp">Categories</a>
     <td><tolog:out query="select count($T) from instance-of($T, op:Category)?"/>
+<% if (has_comments) { %>
 <tr><th><a href="best-photos.jsp">The best photos</a>
     <td>-
+<% } %>
 </table>
 
 <tolog:set var="photos" query="instance-of($P, op:Photo)?"/>
