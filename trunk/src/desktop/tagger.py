@@ -75,7 +75,7 @@ from utils import *
 
 # --- Constants
 
-MAC = 1
+MAC = (System.getProperty("os.name") == "Mac OS X")
 BASE = "http://psi.garshol.priv.no/tmphoto/"
 OP_BASE = "http://psi.ontopedia.net/"
 DC_BASE = "http://purl.org/dc/elements/1.1/"
