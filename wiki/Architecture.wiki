@@ -25,7 +25,3 @@ The actual browsing application, written in JSP using the OKS. By default it ser
 A Python application based on WSGI which reads a simple text file (the index file) that maps from photo IDs to image files on disk. Based on this it scales photos as needed and caches scaled versions on disk. It automagically detects changes to the index file and deletes scaled versions for deleted photos. It also supports the If-modified-since header, which saves quite a bit of HTTP traffic.
 
 Requires ImageMagick for scaling and a bundled Python module for reading EXIF data.
-
-= scripts =
-
-_will describe this later_
