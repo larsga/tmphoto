@@ -1,0 +1,9 @@
+#summary Documentation of how to use the tagger application.
+
+= Introduction =
+
+Will write this later.
+
+= Latitude/longitude =
+
+On places there are two fields called latitude and longitude. These are meant to contain values from Google Maps, which you can [http://www.online-tech-tips.com/computer-tips/find-longitude-latitude/ obtain in several ways].
