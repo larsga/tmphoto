@@ -3,15 +3,30 @@
 
 = Introduction =
 
-There is detailed installation instructions in the zip file that you download. This page is just a quick overview for people wondering what's actually in the zip file.
+There are [http://code.google.com/p/tmphoto/source/browse/trunk/doc/README.txt detailed installation instructions] in [http://code.google.com/p/tmphoto/downloads/list the zip file that you download]. This page is just a quick overview for people wondering what's actually in the zip file.
 
 Prerequisites:
   * Java 1.5 or higher
-  * Jython
-  * Ontopia 5.0.0 or higher
+  * [http://www.jython.org Jython]
+  * [http://code.google.com/p/ontopia Ontopia 5.0.0 or higher]
 
 = What's in there =
 
 A desktop application for tagging photos, and a web application for browsing them.
 
 Here is a screenshot of the desktop application: http://tmphoto.googlecode.com/svn/trunk/doc/screenshot.png
+
+There is also [http://www.garshol.priv.no/tmphoto/ a live demo].
+
+= Features =
+
+The application has a rather extensive feature set:
+  * Tag photos with people, events, places, and categories.
+  * User-friendly display of key EXIF data.
+  * Filtering of photo lists by tags.
+  * Full-text search.
+  * Google Maps integration showing maps of places.
+  * Privacy features, allowing any person, place, event, or photo to be hidden.
+  * Simple user management. Log in to see hidden photos.
+  * [http://www.garshol.priv.no/blog/183.html Web service integration]
+  * Voting on photos.
