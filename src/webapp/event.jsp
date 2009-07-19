@@ -158,31 +158,12 @@
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <td>
 <!-- TMRAP CONTENT -->
-<%--
-  try {
-    TopicIF event = (TopicIF) ContextUtils.getSingleValue("event", pageContext);
-    Collection servers = new ArrayList();
-    servers.add(tmrap_url);
-    TMRAP tmrap = new TMRAP(servers);
-    Collection model = tmrap.query(event);
-    pageContext.setAttribute("servers", model);
-    pageContext.setAttribute("pages", tmrap.getAllPages(model));
-%>
-<c:if test="${not empty pages}">
-<p><b>Blog entries:</b></p>
-
-<ul>
-<c:forEach items="${pages}" var="page">
-  <li><a href="<c:out value="${page.URI}"/>"
-    ><c:out value="${page.name}" escapeXml="false"/></a><br>
-</c:forEach>
-</ul>
-</c:if>
 <%
-  } catch (java.io.IOException e) {
-    out.write("<p><b>TMRAP error: </b> " + e + "</p>");
-  }
---%>
+  if (tmrap_url != null) {
+    String varname = "event";
+%>
+  <%@ include file="tmrap.jsp"%>
+<% } %>
 
 <!-- FILTERS -->
 <c:forEach items="${list.filters}" var="filter">
