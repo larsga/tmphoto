@@ -13,10 +13,30 @@
     <param-value>get-image?</param-value>
   </context-param>
 
-  <context-param>
+  <!--context-param>
     <param-name>tmrap-server</param-name>
     <param-value>http://localhost:6000/get-topic-page</param-value>
+  </context-param-->
+
+  <!--context-param>
+    <param-name>google-maps-key</param-name>
+    <param-value>ABQIAAAA8oFUEfcfBwJ3xTqFdvtQYBT4pz8oWygjc4zMKW0Sgg0jlcfanRRyg1iSx13Hptl3x9lAlGQvZxKDXw</param-value>
+  </context-param-->
+
+  <!--context-param>
+    <param-name>image-processor</param-name>
+    <param-value>no.priv.garshol.topicmaps.tmphoto.images.ImageMagickCLIProcessor</param-value>
+  </context-param-->
+
+  <context-param>
+    <param-name>max-image-workers</param-name>
+    <param-value>2</param-value>
   </context-param>
+
+  <!--context-param>
+    <param-name>image-cache-dir</param-name>
+    <param-value>/tmp</param-value>
+  </context-param-->
   
   <context-param>
     <param-name>score_database</param-name>

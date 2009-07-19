@@ -26,17 +26,28 @@ import no.priv.garshol.topicmaps.tmphoto.images.*;
  * the corresponding scaled image. 
  */
 public class ImageServlet extends HttpServlet {
-  final static private int MAX_WORKERS = 2;
-  final static private String CACHEDIR = getCacheDir();
   static private int active_workers = 0;
   private ImageProcessor improc;
+  private String cachedir;
+  private int maxworkers;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    String klass = config.getServletContext().getInitParameter("image-processor");
-    if (klass == null)
-      klass = "no.priv.garshol.topicmaps.tmphoto.images.JAIProcessor";
+
+    // set up image processor
+    String klass = getParameter(config, "image-processor",
+      "no.priv.garshol.topicmaps.tmphoto.images.JAIProcessor");
     improc = (ImageProcessor) instantiate(klass);
+
+    // set up cache directory
+    String tmp = getParameter(config, "image-cache-dir",
+                              System.getProperty("java.io.tmpdir"));
+    cachedir = setupCacheDir(tmp);
+
+    // get max workers
+    String max = getParameter(config, "max-image-workers", "2");
+    maxworkers = 2; // in case next line throws exception
+    maxworkers = Integer.parseInt(max);
   }
   
   protected void doGet(HttpServletRequest req,
@@ -75,7 +86,7 @@ public class ImageServlet extends HttpServlet {
     if (size.equals("full"))
       return new File(origfile);
 
-    File scaledfile = new File(CACHEDIR + size + File.separator + id + ".jpg");
+    File scaledfile = new File(cachedir + size + File.separator + id + ".jpg");
     if (!scaledfile.exists())
       scaleImage(new File(origfile), scaledfile, getMaxSide(size));
     
@@ -99,8 +110,8 @@ public class ImageServlet extends HttpServlet {
     }
   }
 
-  private static synchronized boolean canRun() {
-    return active_workers < MAX_WORKERS;
+  private synchronized boolean canRun() {
+    return active_workers < maxworkers;
   }
 
   private static synchronized void increment() {
@@ -158,8 +169,7 @@ public class ImageServlet extends HttpServlet {
       return query.substring(pos + 1);
   }
 
-  private static String getCacheDir() {
-    String tmp = System.getProperty("java.io.tmpdir");
+  private static String setupCacheDir(String tmp) {
     if (!tmp.endsWith(File.separator))
       tmp += File.separator;
 
@@ -183,4 +193,13 @@ public class ImageServlet extends HttpServlet {
       return null;
     }
   }
+
+  private static String getParameter(ServletConfig config,
+                                     String name,
+                                     String default_) {
+     String param = config.getServletContext().getInitParameter(name);
+    if (param == null)
+      param = default_;
+    return param;
+ }
 }
