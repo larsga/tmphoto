@@ -6,6 +6,7 @@
 There are [http://code.google.com/p/tmphoto/source/browse/trunk/doc/README.txt detailed installation instructions] in [http://code.google.com/p/tmphoto/downloads/list the zip file that you download]. This page is just a quick overview for people wondering what's actually in the zip file.
 
 Prerequisites:
+  * MacOS X, Linux, or Windows
   * Java 1.5 or higher
   * [http://www.jython.org Jython]
   * [http://code.google.com/p/ontopia Ontopia 5.0.0 or higher]
