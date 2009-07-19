@@ -13,3 +13,5 @@ Prerequisites:
 = What's in there =
 
 A desktop application for tagging photos, and a web application for browsing them.
+
+Here is a screenshot of the desktop application: http://tmphoto.googlecode.com/svn/trunk/doc/screenshot.png
