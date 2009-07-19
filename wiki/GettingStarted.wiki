@@ -23,6 +23,8 @@ There is also [http://www.garshol.priv.no/tmphoto/ a live demo].
 
 The application has a rather extensive feature set:
   * Tag photos with people, events, places, and categories.
+  * Capture family relationships.
+  * Hierarchy of places.
   * User-friendly display of key EXIF data.
   * Filtering of photo lists by tags.
   * Full-text search.
