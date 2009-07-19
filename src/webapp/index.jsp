@@ -13,11 +13,19 @@
 
 <template:insert template='template.jsp'>
 <template:put name='title'>
-  <tolog:out var="reifier"/>
+<tolog:choose>
+  <tolog:when var="reifier">
+    <tolog:out var="reifier"/>
+  </tolog:when>
+  <tolog:otherwise>
+    tmphoto gallery
+  </tolog:otherwise>
+</tolog:choose>
 </template:put>
 
 <template:put name="body">
 
+<tolog:if var="reifier">
 <tolog:if query="dc:creator(%reifier% : dcc:resource, $C : dcc:value)?">
 <p>
  <b>Created by:</b> 
@@ -28,6 +36,7 @@
 <p>
   <tolog:out query="dc:description(%reifier%, $DESC)?"/>
 </p>
+</tolog:if>
 
 <p>Note that photos showing many people and places are hidden for
 privacy reasons. To see these you need to <a href="login.jsp">log
@@ -43,15 +52,45 @@ in</a>. To get a password you need to email me.  </p>
 You can access the photos through lists of:
 </p>
 
+<%-- FIXME: this code can be simplified dramatically once issue 80 in
+     Ontopia is fixed: http://code.google.com/p/ontopia/issues/detail?id=80 --%>
 <table>
 <tr><th><a href="people.jsp">People</a>
-    <td><tolog:out query="select count($T) from instance-of($T, op:Person)?"/>
+    <td>
+<tolog:set var="T" query="select count($T) from instance-of($T, op:Person)?"/>
+<tolog:choose>
+  <tolog:when var="T">
+    <tolog:out var="T"/>
+  </tolog:when>
+  <tolog:otherwise>0</tolog:otherwise>
+</tolog:choose>
 <tr><th><a href="places.jsp">Places</a>
-    <td><tolog:out query="select count($T) from instance-of($T, op:Place)?"/>
+    <td>
+<tolog:set var="T" query="select count($T) from instance-of($T, op:Place)?"/>
+<tolog:choose>
+  <tolog:when var="T">
+    <tolog:out var="T"/>
+  </tolog:when>
+  <tolog:otherwise>0</tolog:otherwise>
+</tolog:choose>
 <tr><th><a href="events.jsp">Events</a>
-    <td><tolog:out query="select count($T) from instance-of($T, op:Event)?"/>
+    <td>
+<tolog:set var="T" query="select count($T) from instance-of($T, op:Event)?"/>
+<tolog:choose>
+  <tolog:when var="T">
+    <tolog:out var="T"/>
+  </tolog:when>
+  <tolog:otherwise>0</tolog:otherwise>
+</tolog:choose>
 <tr><th><a href="categories.jsp">Categories</a>
-    <td><tolog:out query="select count($T) from instance-of($T, op:Category)?"/>
+    <td>
+<tolog:set var="T" query="select count($T) from instance-of($T, op:Category)?"/>
+<tolog:choose>
+  <tolog:when var="T">
+    <tolog:out var="T"/>
+  </tolog:when>
+  <tolog:otherwise>0</tolog:otherwise>
+</tolog:choose>
 <% if (has_comments) { %>
 <tr><th><a href="best-photos.jsp">The best photos</a>
     <td>-
