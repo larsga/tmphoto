@@ -3,8 +3,8 @@
 = Introduction =
 
 The tmphoto application consists of four major components:
-  * tagger.py - desktop application for tagging photos (Jython, Swing, OKS)
-  * tmphoto - web application for browsing photo collections (JSP, OKS)
+  * tagger.py - desktop application for tagging photos (Jython, Swing, Ontopia)
+  * tmphoto - web application for browsing photo collections (JSP, Ontopia)
   * photoserv.py - image server which scales photos on demand (Python, WSGI)
   * scripts - various scripts for handling routine tasks
 
