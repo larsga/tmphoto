@@ -32,4 +32,6 @@
     pageContext.getServletContext().getInitParameter("score_database").equals("true");
   String tmrap_url = 
     pageContext.getServletContext().getInitParameter("tmrap-server");
+  String gmapkey = 
+    pageContext.getServletContext().getInitParameter("google-maps-key");
 %>
