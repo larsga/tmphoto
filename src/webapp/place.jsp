@@ -148,11 +148,14 @@ Photos from <tolog:out var="place"/>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <td width="30%">
 
+<%
+  if (gmapkey != null) {
+%>
 <tolog:if query="ph:latitude(%place%, $LAT),
                  ph:longitude(%place%, $LONG)?">
 <div id="map" style="width: 100%; height: 200px"></div>
 
-<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=ABQIAAAA8oFUEfcfBwJ3xTqFdvtQYBT4pz8oWygjc4zMKW0Sgg0jlcfanRRyg1iSx13Hptl3x9lAlGQvZxKDXw" type="text/javascript"></script>    
+<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=<%= gmapkey %>" type="text/javascript"></script>    
 <script type="text/javascript">
 
     // the place icon
@@ -225,6 +228,7 @@ Photos from <tolog:out var="place"/>
   </div>
 </tolog:foreach>
 </tolog:if>
+<% } // if gmapkey not set %>
 
 <br>
 <!-- TMRAP CONTENT -->

@@ -17,9 +17,12 @@
 
 <p><a href="places.jsp">Tree</a>
 
+<%
+  if (gmapkey != null) {
+%>
 <div id="map" style="width: 800px; height: 650px"></div>
 
-<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=ABQIAAAA8oFUEfcfBwJ3xTqFdvtQYBT4pz8oWygjc4zMKW0Sgg0jlcfanRRyg1iSx13Hptl3x9lAlGQvZxKDXw" type="text/javascript"></script>    
+<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=<%= gmapkey %>" type="text/javascript"></script>    
 <script type="text/javascript">
 
     // the place icon
@@ -89,6 +92,9 @@
   <a href="place.jsp?id=<tolog:id var="PLACE"/>">Pictures</a>
   </div>
 </tolog:foreach>
+<% } /* if gmapkey not set */ else { %>
+  <p>No Google Maps key set, so cannot display map.
+<% } %>
 
 </template:put>
 
