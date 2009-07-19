@@ -33,7 +33,10 @@ public class ImageServlet extends HttpServlet {
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    improc = new JAIProcessor(); // FIXME: make this configurable
+    String klass = config.getServletContext().getInitParameter("image-processor");
+    if (klass == null)
+      klass = "no.priv.garshol.topicmaps.tmphoto.images.JAIProcessor";
+    improc = (ImageProcessor) instantiate(klass);
   }
   
   protected void doGet(HttpServletRequest req,
@@ -169,5 +172,15 @@ public class ImageServlet extends HttpServlet {
       cache.mkdir();
     
     return tmp;
+  }
+
+  private static Object instantiate(String classname) {
+    try {
+      Class theclass = Class.forName(classname);
+      return theclass.newInstance();
+    } catch (Exception e) { // too many damn detail exceptions
+      e.printStackTrace(); // for the log
+      return null;
+    }
   }
 }
