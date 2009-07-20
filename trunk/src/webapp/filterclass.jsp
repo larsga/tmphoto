@@ -1,5 +1,47 @@
 <%!
 
+public class FilterContext {
+  private TopicIF topic;
+  private String date;
+
+  public FilterContext(PageContext pageContext) {
+    String filter = (String)
+      pageContext.getAttribute("filter", PageContext.SESSION_SCOPE);
+    if (filter == null || filter.equals(""))
+      return;
+
+    if (filter.startsWith("topic:")) {
+      TopicMapIF topicmap = (TopicMapIF) 
+        ContextUtils.getSingleValue("topicmap", pageContext);
+      LocatorIF base = topicmap.getStore().getBaseAddress();
+      LocatorIF itemid = base.resolveAbsolute("#" + filter.substring(6));
+      topic = (TopicIF) topicmap.getObjectByItemIdentifier(itemid);
+    } else if (filter.startsWith("date:"))
+      date = filter.substring(5);
+    else
+      throw new RuntimeException("Unknown filter type: '" + filter + "'");
+  }
+
+  public boolean getSet() {
+    return topic != null || date != null;
+  }
+
+  public String getLabel() {
+    if (topic != null)
+      return TopicStringifiers.toString(topic);
+    else
+      return date;
+  }
+
+  public TopicIF getTopic() {
+    return topic;
+  }
+
+  public String getDate() {
+    return date;
+  }
+}
+
 public class FilteredList {
   private TopicMapIF topicmap;
   private String query;
@@ -7,7 +49,7 @@ public class FilteredList {
   private String main;
   private ContextTag contextTag;
   private Map filters;
-  private TopicIF filter;
+  private FilterContext context;
   private List rows;
   private int pageno;
   private int pagecount;
@@ -20,7 +62,7 @@ public class FilteredList {
     this.main  = main;
     this.topicmap = (TopicMapIF) 
       ContextUtils.getSingleValue("topicmap", pageContext);
-    this.filter = (TopicIF) ContextUtils.getSingleValue("filter", pageContext);
+    this.context = (FilterContext) pageContext.getRequest().getAttribute("filter");
     this.contextTag = FrameworkUtils.getContextTag(pageContext);
     this.filters = new HashMap();
     this.rows = build();
@@ -89,7 +131,7 @@ public class FilteredList {
   }
 
   private boolean filter(TopicIF topic) {
-    boolean result = (filter == null);
+    boolean result = !context.getSet();
     Iterator it = topic.getRoles().iterator();
     while (it.hasNext()) {
       AssociationRoleIF role = (AssociationRoleIF) it.next();
@@ -108,23 +150,52 @@ public class FilteredList {
       if (role2 != null)
         player = role2.getPlayer();
 
-      if (filter == null) {
+      if (!context.getSet()) {
         if (player != null)
           addToIndex(role.getType(), assoc.getType(), player);
-      } else if (filter == player)
+      } else if (context.getTopic() == player)
         result = true;
     }
+
+    it = topic.getOccurrences().iterator();
+    while (it.hasNext()) {
+      OccurrenceIF occ = (OccurrenceIF) it.next();
+      if (!isDate(occ.getValue()))
+        continue;
+
+      if (!context.getSet())
+        addToIndex(occ.getType(), occ.getValue());
+      else if (context.getDate() != null && 
+               occ.getValue().startsWith(context.getDate()))
+        result = true;
+    }
+
     return result;
   }
 
-  private void addToIndex(TopicIF roletype, TopicIF assoctype, TopicIF player){
+  private boolean isDate(String value) {
+    // FIXME: this won't do...
+    return (value.charAt(0) == '1' || value.charAt(0) == '2');
+  }
+
+  private void addToIndex(TopicIF roletype, TopicIF assoctype, TopicIF player) {
     String key = getKey(roletype, assoctype, player);
-    Filter filter = (Filter) filters.get(key);
+    AssociationFilter filter = (AssociationFilter) filters.get(key);
     if (filter == null) {
-      filter = new Filter(roletype, assoctype);
+      filter = new AssociationFilter(roletype, assoctype);
       filters.put(key, filter);
     }
     filter.addTopic(player);
+  }
+
+  private void addToIndex(TopicIF occtype, String value) {
+    String key = getKey(occtype, value);
+    DateFilter filter = (DateFilter) filters.get(key);
+    if (filter == null) {
+      filter = new DateFilter(occtype);
+      filters.put(key, filter);
+    }
+    filter.addDate(value);
   }
 
   private void weed() {
@@ -138,8 +209,7 @@ public class FilteredList {
     }
   }
 
-  private String getKey(TopicIF roletype, TopicIF assoctype, TopicIF player){
-    //return roletype.getObjectId() + "$" + assoctype.getObjectId();
+  private String getKey(TopicIF roletype, TopicIF assoctype, TopicIF player) {
     Iterator it = player.getTypes().iterator();
     if (it.hasNext()) {
       TopicIF type = (TopicIF) it.next();
@@ -147,28 +217,49 @@ public class FilteredList {
     } else
       return "null";
   }
+
+  private String getKey(TopicIF occtype, String value) {
+    return occtype.getObjectId();
+  }
 }
 
-public class Filter {
-  private TopicIF roletype;
-  private TopicIF assoctype;
-  private Map topics;
-  private TopicIF type;
+public abstract class Filter {
+  protected Map counters;
 
-  public Filter(TopicIF roletype, TopicIF assoctype) {
-    this.roletype = roletype;
-    this.assoctype = assoctype;
-    this.topics = new HashMap();
+  public Filter() {
+    this.counters = new HashMap();
   }
 
   public boolean isEmpty() {
-    return topics.isEmpty();
+    return counters.isEmpty();
   }
 
-  public List getTopics() {
-    ArrayList list = new ArrayList(topics.values());
+  public List getCounters() {
+    ArrayList list = new ArrayList(counters.values());
     Collections.sort(list);
     return list;
+  }
+
+  public void weedOutCounters(FilteredList list) {
+    Iterator it = counters.values().iterator();
+    while (it.hasNext()) {
+      Counter c = (Counter) it.next();
+      if (c.getCount() >= list.getRowCount())
+        it.remove();
+    }
+  }
+
+  public abstract TopicIF getType();
+}
+
+public class AssociationFilter extends Filter {
+  private TopicIF roletype;
+  private TopicIF assoctype;
+  private TopicIF type;
+
+  public AssociationFilter(TopicIF roletype, TopicIF assoctype) {
+    this.roletype = roletype;
+    this.assoctype = assoctype;
   }
 
   public TopicIF getRoleType() {
@@ -185,10 +276,10 @@ public class Filter {
 
   public void addTopic(TopicIF topic) {
     // update count
-    Counter c = (Counter) topics.get(topic);
+    Counter c = (Counter) counters.get(topic);
     if (c == null) {
-      c = new Counter(topic);
-      topics.put(topic, c);
+      c = new TopicCounter(topic);
+      counters.put(topic, c);
     }
     c.count();
 
@@ -196,30 +287,64 @@ public class Filter {
     if (type == null && !topic.getTypes().isEmpty())
       type = (TopicIF) topic.getTypes().iterator().next();
   }
+}
+
+public class DateFilter extends Filter {
+  private TopicIF occtype;
+  private List dates; // simple list of date strings
+
+  public DateFilter(TopicIF occtype) {
+    this.occtype = occtype;
+    this.dates = new ArrayList();
+  }
+
+  public TopicIF getType() {
+    return occtype;
+  }
+
+  public void addDate(String value) {
+    dates.add(value);
+  }
 
   public void weedOutCounters(FilteredList list) {
-    Iterator it = topics.values().iterator();
-    while (it.hasNext()) {
-      Counter c = (Counter) it.next();
-      if (c.getCount() >= list.getRowCount())
-        it.remove();
+    int[] lengths = new int[] { 16, 13, 10, 7, 4};
+    // 16: 2009-01-01 12:00
+    // 13: 2009-01-01 12
+    // 10: 2009-01-01
+    // 7: 2009-01
+    // 4: 2009
+
+    Map prevcounters = null;
+    for (int length = 0; length < lengths.length; length++) {
+      prevcounters = counters;
+      counters = new HashMap();
+      for (int ix = 0; ix < dates.size(); ix++) {
+        String date = (String) dates.get(ix);
+        if (date.length() >= lengths[length])
+          date = date.substring(0, lengths[length]);
+        addValue(date);
+      }
+      if (counters.size() < 15)
+        break;
     }
+
+    if (counters.size() == 1)
+      counters = prevcounters;
+  }
+
+  private void addValue(String value) {
+    // update count
+    Counter c = (Counter) counters.get(value);
+    if (c == null) {
+      c = new StringCounter("date", value);
+      counters.put(value, c);
+    }
+    c.count();
   }
 }
 
-public static class Counter implements Comparable {
-  private static Comparator comp;
-  private TopicIF topic;
-  private int count;
-
-  { // static initializer
-    StringifierIF strify = TopicStringifiers.getDefaultStringifier();
-    comp = TopicComparators.getCaseInsensitiveComparator(strify);
-  }
-
-  public Counter(TopicIF topic) {
-    this.topic = topic;
-  }
+public static abstract class Counter implements Comparable {
+  protected int count;
 
   public void count() {
     count++;
@@ -229,13 +354,65 @@ public static class Counter implements Comparable {
     return count;
   }
 
-  public TopicIF getTopic() {
-    return topic;
+  public abstract String getId();
+  public abstract String getLabel();
+}
+
+public static class TopicCounter extends Counter {
+  private static StringifierIF strify;
+  private TopicIF topic;
+
+  { // static initializer
+    strify = TopicStringifiers.getDefaultStringifier();
+  }
+
+  public TopicCounter(TopicIF topic) {
+    this.topic = topic;
+  }
+
+  public String getId() {
+    Iterator it = topic.getItemIdentifiers().iterator();
+    while (it.hasNext()) {
+      LocatorIF loc = (LocatorIF) it.next();
+      String uri = loc.getAddress();
+      int pos = uri.indexOf('#');
+      if (pos == -1)
+        continue;
+      return "topic:" + uri.substring(pos + 1);
+    }
+    return "topic:" + topic.getObjectId();
+  }
+
+  public String getLabel() {
+    return strify.toString(topic);
   }
 
   public int compareTo(Object other) {
-    Counter oc = (Counter) other;
-    return comp.compare(topic, oc.getTopic());
+    TopicCounter oc = (TopicCounter) other;
+    return getLabel().compareTo(oc.getLabel());
+  }
+}
+
+public static class StringCounter extends Counter {
+  private String prefix;
+  private String string;
+
+  public StringCounter(String prefix, String string) {
+    this.prefix = prefix;
+    this.string = string;
+  }
+
+  public String getLabel() {
+    return string;
+  }
+
+  public String getId() {
+    return prefix + ":" + string;
+  }
+
+  public int compareTo(Object other) {
+    StringCounter oc = (StringCounter) other;
+    return string.compareTo(oc.string);
   }
 }
 

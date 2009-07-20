@@ -15,14 +15,9 @@
     </jsp:forward>
   </tolog:otherwise>
 </tolog:choose>
-<tolog:set var="filter"></tolog:set>
-<c:if test='${sessionScope["filter"] != null && sessionScope["filter"] != ""}'>
-  <tolog:query name="lookup">
-    $T = <c:out value='${sessionScope["filter"]}'/>?
-  </tolog:query>
-  <tolog:set var="filter" query='lookup'/>
-</c:if>
 <%
+ request.setAttribute("filter", new FilterContext(pageContext));
+
  String sortby = request.getParameter("sort");
  if (sortby == null)
    sortby = "time";
@@ -44,11 +39,11 @@
 
 <template:put name="body">
 
-<tolog:if var="filter">
-  <p>Filtered by: <b><tolog:out var="filter"/></b>
+<c:if test="${filter.set}">
+  <p>Filtered by: <b><c:out value="${filter.label}"/></b>
     (<a href="unset.jsp?attr=filter">Remove filter</a>)
   </p>
-</tolog:if>
+</c:if>
 
 <tolog:if query="dc:description(%person%, $DESC)?">
   <p><tolog:out var="DESC"/></p>
@@ -186,10 +181,10 @@
 <tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
-<c:forEach items="${filter.topics}" var="counter">
+<c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="set-filter.jsp?id=<tolog:id var="counter.topic"/>" rel="nofollow"
-          ><tolog:out var="counter.topic"/></a>
+<a href="set-filter.jsp?id=<tolog:out var="counter.id"/>" rel="nofollow"
+          ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
