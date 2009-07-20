@@ -91,16 +91,17 @@
 <td align=right><a href="javascript:swap('<tolog:oid var="filter.type"/>')"
                   ><b id="link<tolog:oid var="filter.type"/>">+</b></a>
 
-<tr><td colspan=2 style="display: none" 
+<tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
 <c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="month.jsp?month=<tolog:out var="month"/>&filter=<tolog:out var="counter.id"/>" rel="nofollow"
+<a href="set-filter.jsp?id=<tolog:out var="counter.id"/>" rel="nofollow"
           ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
+</div>
 </table>
 </c:forEach>
 
@@ -108,10 +109,10 @@
 </table>
 </template:put>
 
-<tolog:if var="filter">
+<c:if test="${filter.set}">
   <template:put name="headertags">
     <meta name="robots" content="noindex,nofollow">
   </template:put>
-</tolog:if>
+</c:if>
 </template:insert>
 </tolog:context>
