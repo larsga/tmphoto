@@ -5,18 +5,17 @@
 <%@ include file="tolog.jsp"%>
 <%@ include file="handleuser.jsp"%>
 <tolog:set var="month"><%= request.getParameter("month") %></tolog:set>
-<tolog:set var="filter"  reqparam="filter"/>
 <tolog:set var="topicmap" query="topicmap($TM)?"/>
 <%
-  String x = request.getParameter("n");
-  int n = 1;
-  if (x != null)
-    n = Integer.parseInt(x);
+ request.setAttribute("filter", new FilterContext(pageContext));
+
+ String sortby = request.getParameter("sort");
+ if (sortby == null)
+   sortby = "time";
 %>
 <c:set var="place" scope="session"/>
 <c:set var="person" scope="session" value=""/>
 <c:set var="category" scope="session" value=""/>
-<c:set var="filter" scope="session" value=""/>
 
 <template:insert template='template.jsp'>
 <template:put name='title'>
@@ -25,11 +24,11 @@
 
 <template:put name="body">
 
-<tolog:if var="filter">
-  <p>Filtered by: <b><tolog:out var="filter"/></b>
-    (<a href="?month=<tolog:out var="month"/>">Remove filter</a>)
+<c:if test="${filter.set}">
+  <p>Filtered by: <b><c:out value="${filter.label}"/></b>
+    (<a href="unset.jsp?attr=filter">Remove filter</a>)
   </p>
-</tolog:if>
+</c:if>
 
 <!-- PICTURES -->
 <table width="100%">
@@ -56,37 +55,9 @@
   request.setAttribute("list", list);
   int pages = (list.getRowCount() / 50) + 1;
 %>
-<tolog:set var="paging">
-<%
-  if (pages > 1) {
-%>
-<p>
-<%
-    if (n > 1) {
-%>
-      <a href="month.jsp?month=<tolog:out var="month"/>&n=<%= n-1 %>"><img src="nav_prev.gif" border="0"></a>
-<%
-    }
-    for (int ix = 1; ix <= pages; ix++) {
-      if (ix == n) {
-%>
-        <b><%= ix %></b>
-<%
-      } else {
-%>
-        <a href="month.jsp?month=<tolog:out var="month"/>&n=<%= ix %>"><%= ix %></a>
-<%
-      }
-    }
-    list.setSlice((n-1) * 50, n * 50);
-    if (n < pages) {
-%>
-      <a href="month.jsp?month=<tolog:out var="month"/>&n=<%= n+1 %>"><img src="nav_next.gif" border="0" alt="Next"></a>
-<%
-    }
-  }  
-%>
-</tolog:set>
+<c:set var="pagelink">month.jsp?month=<tolog:out var="month"/><%
+  if (sortby.equals("score")) { %>&sort=score<% } %></c:set>
+<%@ include file="paging.jsp"%>
 
 <tolog:out var="paging" escape="no"/>
 <table>
@@ -123,10 +94,10 @@
 <tr><td colspan=2 style="display: none" 
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
-<c:forEach items="${filter.topics}" var="counter">
+<c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="month.jsp?month=<tolog:out var="month"/>&filter=<tolog:id var="counter.topic"/>" rel="nofollow"
-          ><tolog:out var="counter.topic"/></a>
+<a href="month.jsp?month=<tolog:out var="month"/>&filter=<tolog:out var="counter.id"/>" rel="nofollow"
+          ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
