@@ -14,18 +14,13 @@
     </jsp:forward>
   </tolog:otherwise>
 </tolog:choose>
-<tolog:set var="filter"></tolog:set>
-<c:if test='${sessionScope["filter"] != null && sessionScope["filter"] != ""}'>
-  <tolog:query name="lookup">
-    $T = <c:out value='${sessionScope["filter"]}'/>?
-  </tolog:query>
-  <tolog:set var="filter" query='lookup'/>
-</c:if>
 <tolog:set var="topicmap" query="topicmap($TM)?"/>
 <c:set var="place" scope="session"><tolog:id var="place"/></c:set>
 <c:set var="person" scope="session" value=""/>
 <c:set var="category" scope="session" value=""/>
 <%
+ request.setAttribute("filter", new FilterContext(pageContext));
+
  String sortby = request.getParameter("sort");
  if (sortby == null)
    sortby = "time";
@@ -41,11 +36,11 @@ Photos from <tolog:out var="place"/>
 <!-- LEFT COLUMN -->
 <table width="100%"><tr><td>
 
-<tolog:if var="filter">
-  <p>Filtered by: <b><tolog:out var="filter"/></b>
+<c:if test="${filter.set}">
+  <p>Filtered by: <b><c:out value="${filter.label}"/></b>
     (<a href="unset.jsp?attr=filter">Remove filter</a>)
   </p>
-</tolog:if>
+</c:if>
 
 <tolog:if query="op:located_in($PAR : op:Container, %place% : op:Containee)?">
 <p>In: <a href="place.jsp?id=<tolog:id var="PAR"/>"
@@ -249,10 +244,10 @@ Photos from <tolog:out var="place"/>
 <tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
-<c:forEach items="${filter.topics}" var="counter">
+<c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="set-filter.jsp?id=<tolog:id var="counter.topic"/>" rel="nofollow"
-          ><tolog:out var="counter.topic"/></a>
+<a href="set-filter.jsp?id=<tolog:out var="counter.id"/>" rel="nofollow"
+          ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>

@@ -17,19 +17,15 @@
 <c:set var="place" scope="session"/>
 <c:set var="person" scope="session" value=""/>
 <c:set var="category" scope="session" value=""/>
-<tolog:set var="filter"></tolog:set>
-<c:if test='${sessionScope["filter"] != null && sessionScope["filter"] != ""}'>
-  <tolog:query name="lookup">
-    $T = <c:out value='${sessionScope["filter"]}'/>?
-  </tolog:query>
-  <tolog:set var="filter" query='lookup'/>
-</c:if>
+<tolog:set var="topicmap" query="topicmap($TM)?"/>
+<%
+  request.setAttribute("filter", new FilterContext(pageContext));
+%>
 <tolog:if var="nouser">
   <tolog:if query="ph:hide(%event% : ph:hidden)?">
     <jsp:forward page="hidden.jsp"/>
   </tolog:if>
 </tolog:if>
-<tolog:set var="topicmap" query="topicmap($TM)?"/>
 <%
  String sortby = request.getParameter("sort");
  if (sortby == null)
@@ -43,11 +39,11 @@
 
 <template:put name="body">
 
-<tolog:if var="filter">
-  <p>Filtered by: <b><tolog:out var="filter"/></b>
+<c:if test="${filter.set}">
+  <p>Filtered by: <b><c:out value="${filter.label}"/></b>
     (<a href="unset.jsp?attr=filter">Remove filter</a>)
   </p>
-</tolog:if>
+</c:if>
 
 <p>
 <tolog:if query="dc:description(%event%, $DESC)?">
@@ -127,12 +123,6 @@
 <table>
 <c:forEach items="${list.rows}" var="row"> 
   <c:set var="photo" value="${row.PHOTO}"/>
-<%--  <tr><td><a href="photo.jsp?id=<tolog:id var="PHOTO"/><tolog:if var="catfilter">&cat=<tolog:id var="catfilter"/></tolog:if>"
-            ><tolog:out var="PHOTO"/></a>
-      <td><tolog:out var="TIME"/>
-      <td><a href="place.jsp?id=<tolog:id var="PLACE"/>"
-            ><tolog:out var="PLACE"/></a>--%>
-
 <%
   TopicIF photo = (TopicIF) pageContext.getAttribute("photo");
   ContextUtils.setSingleValue("photo", pageContext, photo);
@@ -175,10 +165,10 @@
 <tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
-<c:forEach items="${filter.topics}" var="counter">
+<c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="set-filter.jsp?id=<tolog:id var="counter.topic"/>" rel="nofollow"
-          ><tolog:out var="counter.topic"/></a>
+<a href="set-filter.jsp?id=<tolog:out var="counter.id"/>" rel="nofollow"
+          ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
