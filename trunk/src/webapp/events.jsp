@@ -37,28 +37,41 @@ Events
     <tolog:if var="nouser">
       not(ph:hide($EVENT : ph:hidden)),
     </tolog:if>
-    ph:start-date($EVENT, $SDATE),
-    ph:end-date($EVENT, $EDATE),
-    year($SDATE, $YEAR),
+    { ph:start-date($EVENT, $SDATE) },
+    { ph:end-date($EVENT, $EDATE) },
+    { year($SDATE, $YEAR) | not(year($SDATE, $YEAR)) },
     ph:taken-during($PHOTO : op:Image, $EVENT : op:Event)
   order by $YEAR desc, $SDATE desc?
 </tolog:query>
 <tolog:foreach query='events' groupBy="YEAR">
 
   <tr><td colspan=2>
-    <h2 style="margin-top: 12pt"><a name="y<tolog:out var="YEAR"/>"
-       ><tolog:out var="YEAR"/></a></h2>
+    <h2 style="margin-top: 12pt">
+    <tolog:choose> 
+      <tolog:when var="YEAR">
+        <a name="y<tolog:out var="YEAR"/>"><tolog:out var="YEAR"/></a>
+      </tolog:when>
+      <tolog:otherwise>
+        No date
+      </tolog:otherwise>
+    </tolog:choose>
+    </h2>
 
   <tolog:foreach>
     <tr <tolog:if query="not(ph:is-processed(%EVENT% : ph:processed))?">
          class=unprocessed
-        </tolog:if>
-        ><td>
-            <a href="event.jsp?id=<tolog:id var="EVENT"/>"
+        </tolog:if>>
+        <td><a href="event.jsp?id=<tolog:id var="EVENT"/>"
               ><tolog:out var="EVENT"/></a>
-        <td><tolog:out var="SDATE"/> -
-            <tolog:out var="EDATE"/>
-        <td>&nbsp;&nbsp;&nbsp;<tolog:out var="PHOTO"/>    
+      <tolog:choose>
+        <tolog:when var="SDATE">
+          <td><tolog:out var="SDATE"/> - <tolog:out var="EDATE"/>
+        </tolog:when>
+        <tolog:otherwise>
+          <td>No date
+        </tolog:otherwise>
+      </tolog:choose>
+      <td>&nbsp;&nbsp;&nbsp;<tolog:out var="PHOTO"/>    
   </tolog:foreach>
 </tolog:foreach>
 </table>
