@@ -17,6 +17,7 @@ Events
 
 <p>
 <tolog:query name="years">
+  /* #OPTION: optimizer.reorder = false */
   select $YEAR from
     instance-of($EVENT, op:Event),
     <tolog:if var="nouser">
