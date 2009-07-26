@@ -590,6 +590,17 @@ class TopicRemoveListener(ActionListener):
 
 from java.awt import Dimension, BorderLayout, GridBagLayout, GridBagConstraints
 
+class WindowClosingListener(WindowListener):
+    # using this intermediate object between the TTE and the frame avoids
+    # getting "Exception in thread "AWT-EventQueue-0" RuntimeError: maximum
+    # recursion depth exceeded". Not sure why.
+
+    def __init__(self, tte):
+        self._tte = tte
+
+    def windowClosing(self, event):
+        self._tte._store() # avoids losing data when closing window
+
 class TopicTypeEditor(ListSelectionListener):
 
     def __init__(self, heading, topictype):
@@ -608,6 +619,7 @@ class TopicTypeEditor(ListSelectionListener):
 
         self._add_field_controls(container)
 
+        frame.addWindowListener(WindowClosingListener(self))
         frame.getContentPane().add(container, BorderLayout.EAST)
         frame.pack()
         frame.setVisible(1)
@@ -625,7 +637,7 @@ class TopicTypeEditor(ListSelectionListener):
     def _store(self):
         for synchronizer in self._synchronizers:
             synchronizer.synchronize()
-        
+
 # --- Person editor
 
 class PersonEditor(TopicTypeEditor):
