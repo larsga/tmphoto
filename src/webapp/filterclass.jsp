@@ -166,16 +166,28 @@ public class FilteredList {
       if (!context.getSet())
         addToIndex(occ.getType(), occ.getValue());
       else if (context.getDate() != null && 
-               occ.getValue().startsWith(context.getDate()))
+               matchesDate(occ.getValue(), context.getDate()))
         result = true;
     }
 
     return result;
   }
 
+  private boolean matchesDate(String realdate, String filterdate) {
+    if (filterdate.endsWith(":xx:xx"))
+      filterdate = filterdate.substring(0, 13);
+    else if (filterdate.endsWith(":xx"))
+      filterdate = filterdate.substring(0, 16);
+
+    return realdate.startsWith(filterdate);
+  }
+
   private boolean isDate(String value) {
     // FIXME: this won't do...
-    return (value.charAt(0) == '1' || value.charAt(0) == '2');
+    if (value.length() < 10)
+      return false;
+    return ((value.charAt(0) == '1' || value.charAt(0) == '2') &&
+            (value.charAt(1) >= '0' && value.charAt(1) <= '9'));
   }
 
   private void addToIndex(TopicIF roletype, TopicIF assoctype, TopicIF player) {
@@ -302,6 +314,10 @@ public class DateFilter extends Filter {
     return occtype;
   }
 
+  /**
+   * Adds a datetime actually found in the topic map. This is later weeded
+   * to produce the values used for filtering.
+   */
   public void addDate(String value) {
     dates.add(value);
   }
@@ -332,7 +348,18 @@ public class DateFilter extends Filter {
       counters = prevcounters;
   }
 
+  /**
+   * Adds a weeded value to potentially be used for filtering. Potentially
+   * because we might reduce the lengths to get fewer values.
+   */
   private void addValue(String value) {
+    // 2009-01-01 12 and 2009-01-01 12:00 is kind of awkward, so we pad these
+    // with (:xx)?:xx
+    if (value.length() == 13)
+      value += ":xx:xx";
+    else if (value.length() == 16)
+      value += ":xx";
+
     // update count
     Counter c = (Counter) counters.get(value);
     if (c == null) {
