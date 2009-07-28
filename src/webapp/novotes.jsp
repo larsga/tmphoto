@@ -18,15 +18,15 @@ Photos with no votes
 <table width="100%">
 
 <tolog:foreach query="
-  instance-of($PHOTO, ph:image),
+  instance-of($PHOTO, op:Image),
   not(ph:vote-score($PHOTO, $SCORE)),
-  occ:last-modified-at($PHOTO, $DATE)
+  ph:time-taken($PHOTO, $DATE)
 order by $DATE limit 50?">
 <tr><td>
 <a href="photo.jsp?id=<tolog:id var="PHOTO"/>"><img src="<%= pageContext.getServletContext().getInitParameter("photo-server") %><tolog:id var="PHOTO"/>;thumb" border="0"></a>
 
 <td valign=top><span style="font-size: 75%"><tolog:out var="PHOTO"/><br>
-<tolog:if query="ph:taken-at($PLACE : ph:location, %PHOTO% : ph:photo)?">
+<tolog:if query="ph:taken-at($PLACE : op:Place, %PHOTO% : op:Image)?">
   <a href="place.jsp?id=<tolog:id var="PLACE"/>"><tolog:out var="PLACE"/></a><br>
 </tolog:if>
 <tolog:out var="DATE"/>
