@@ -17,7 +17,6 @@ Events
 
 <p>
 <tolog:query name="years">
-  /* #OPTION: optimizer.reorder = false */
   select $YEAR from
     instance-of($EVENT, op:Event),
     <tolog:if var="nouser">
@@ -33,6 +32,7 @@ Events
 
 <table>
 <tolog:query name="events">
+  /* #OPTION: optimizer.reorder = false */
   select $EVENT, $SDATE, $EDATE, $YEAR, count($PHOTO) from
     instance-of($EVENT, op:Event),
     <tolog:if var="nouser">

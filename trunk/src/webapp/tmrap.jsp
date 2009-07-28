@@ -1,6 +1,6 @@
-<%--
+<%
   // Contract: variable varname must refer to the Ontopia variable holding
-               the topic to look up
+  //           the topic to look up
 
   try {
     TopicIF event = (TopicIF) ContextUtils.getSingleValue(varname, pageContext);
@@ -25,4 +25,4 @@
   } catch (java.io.IOException e) {
     out.write("<p><b>TMRAP error: </b> " + e + "</p>");
   }
---%>
+%>
