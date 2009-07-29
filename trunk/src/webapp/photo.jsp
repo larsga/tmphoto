@@ -318,7 +318,7 @@ function moveoff(number) {
 function vote(number) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("POST", "set-score.jsp?id=" + photoid + "&score=" + number, false);
-  xmlhttp.send();
+  xmlhttp.send("");
   if (xmlhttp.readyState == 4 &&
       xmlhttp.status == 200) {
     if (userscore == 0) {
