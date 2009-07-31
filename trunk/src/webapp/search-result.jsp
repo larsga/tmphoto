@@ -5,14 +5,12 @@
 <%@ include file="handleuser.jsp"%>
 <%
   String search = StringUtils.transcodeUTF8(request.getParameter("search"));
-  String x = request.getParameter("n");
-  int n = 1;
-  if (x != null)
-    n = Integer.parseInt(x);
 %>
 <tolog:set var="search"><%= search %></tolog:set>
 <tolog:set var="topicmap" query="topicmap($TM)?"/>
-<tolog:set var="filter"  reqparam="filter"/>
+<%
+  request.setAttribute("filter", new FilterContext(pageContext));
+%>
 
 <template:insert template='template.jsp'>
 <template:put name='title'>Search result</template:put>
@@ -23,6 +21,12 @@
 <input name=search size=50 style="font-size: 140%" value="<%= search %>">
 <input type=submit value=Search style="font-size: 140%">
 </form>
+
+<c:if test="${filter.set}">
+  <p>Filtered by: <b><c:out value="${filter.label}"/></b>
+    (<a href="unset.jsp?attr=filter">Remove filter</a>)
+  </p>
+</c:if>
 
 <tolog:set var="query">
   select $TOPIC, $REL from
@@ -42,35 +46,13 @@
 
 <%
   String query = (String) ContextUtils.getSingleValue("query", pageContext);
-  String sort = "$REL desc";
-  FilteredList list = new FilteredList(pageContext, query, sort, "TOPIC",
-                                       null);
+  FilteredList list = new FilteredList(pageContext, query, "$REL desc", "TOPIC",
+                                       "event");
   request.setAttribute("list", list);
-  request.setAttribute("pages", list.getPageList());
 %>
 
-<%-- ================================================================= --%>
-<tolog:set var="paging">
-<c:if test="${pages.morePages}">
-<c:if test="${pages.showBackButton}">
-  <a href="?search=<%= search %>&n=<%= n-1 %>"><img src="resources/nav_prev.gif" border="0"></a>
-</c:if>
-<c:forEach items="${pages.pages}" var="page">
-  <c:choose>
-    <c:when test="${page.current}">
-      <b><c:out value="${page.pageNumber}"/></b>
-    </c:when>
-    <c:otherwise>
-      <a href="?search=<%= search %>&n=<c:out value="${page.pageNumber}"/>"><c:out value="${page.pageNumber}"/></a>
-    </c:otherwise>
-  </c:choose>
-</c:forEach>
-<c:if test="${pages.showNextButton}">
-  <a href="?search=<%= search %>&n=<%= n+1 %>"><img src="resources/nav_next.gif" border="0"></a>
-</c:if>
-</c:if>
-</tolog:set>
-<%-- ================================================================= --%>
+<c:set var="pagelink">?search=<%= search %></c:set>
+<%@ include file="paging.jsp"%>
 
 <table width="100%"><tr><td>
 
@@ -125,43 +107,28 @@
 <tolog:out var="paging" escape="no"/>
 
 <!-- FILTERS -->
-<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<td align=right>
-
-<script>
-function swap(id) {
-  var elem = document.getElementById("f" + id);
-  var link = document.getElementById("link" + id);
-  var text = link.children[0].childNodes[0];
-  if (elem.style.display == "none") {
-    elem.style.display = "table-cell";    
-    text.data = "-";
-  } else {
-    elem.style.display = "none";
-    text.data = "+";
-  }
-}
-</script>
-
+<td>
+<%--
 <c:forEach items="${list.filters}" var="filter">
 <table width="100%" class=filterbox><tr><td>
 <p><b>Filter by <tolog:out var="filter.type"/></b></p>
-<td align=right><a id="link<tolog:oid var="filter.type"/>"
-                   href="javascript:swap('<tolog:oid var="filter.type"/>')"
-                  ><b>+</b></a>
+<td align=right><a href="javascript:swap('<tolog:oid var="filter.type"/>')"
+                  ><b id="link<tolog:oid var="filter.type"/>">+</b></a>
 
-<tr><td colspan=2 style="display: none" 
+<tr><td colspan=2><div class="hidden"
         id="f<tolog:oid var="filter.type"/>">
 <table width="100%">
-<c:forEach items="${filter.topics}" var="counter">
+<c:forEach items="${filter.counters}" var="counter">
 <tr><td>
-<a href="?search=<%= search %>&filter=<tolog:id var="counter.topic"/>"
-          ><tolog:out var="counter.topic"/></a>
+<a href="set-filter.jsp?id=<tolog:out var="counter.id"/>" rel="nofollow"
+          ><tolog:out var="counter.label"/></a>
     <td><tolog:out var="counter.count"/>
 </c:forEach>
 </table>
+</div>
 </table>
 </c:forEach>
+--%>
 
 </table>
 
