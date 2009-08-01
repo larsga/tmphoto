@@ -42,6 +42,9 @@
   ph:time-taken($PHOTO, $TIME),
   str:starts-with($TIME, %year%),
   ph:taken-at($PHOTO : op:Image, $PLACE : op:Place)
+  <% if (sortby.equals("score")) { %>
+    , ph:vote-score($PHOTO, $AVG)
+  <% } %>
   <tolog:if var="nouser">
   ,
   not(ph:hide($PHOTO : ph:hidden)),
