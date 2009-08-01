@@ -17,6 +17,7 @@ public class AWTProcessor implements ImageProcessor {
 
   public void scaleImage(File source, File destination, int maxside)
     throws IOException {
+    ImageIO.setUseCache(false);
     BufferedImage bsrc = ImageIO.read(source);
 
     double ratio = (double) maxside / Math.max(bsrc.getHeight(), bsrc.getWidth());
@@ -29,5 +30,9 @@ public class AWTProcessor implements ImageProcessor {
       AffineTransform.getScaleInstance(ratio, ratio);
     g.drawRenderedImage(bsrc, at);
     ImageIO.write(bdest, "JPG", destination);
+
+    bsrc.flush();
+    bdest.flush();
+    g.dispose();
   }
 }
