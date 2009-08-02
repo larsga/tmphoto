@@ -37,7 +37,7 @@
   </context-param-->
 
   <!-- if these are commented out datbase support is automatically turned off -->
-  <context-param>
+  <!--context-param>
     <param-name>jdbcurl</param-name>
     <param-value>jdbc:postgresql:tmphoto</param-value>
   </context-param>
@@ -48,7 +48,7 @@
   <context-param>
     <param-name>jdbcpasswd</param-name>
     <param-value>secret</param-value>
-  </context-param>
+  </context-param-->
   
   <servlet>
     <servlet-name>FrontController</servlet-name>
