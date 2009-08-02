@@ -22,14 +22,19 @@
   net.ontopia.topicmaps.nav2.taglibs.tolog.*,
   net.ontopia.topicmaps.nav2.portlets.pojos.*,
   javax.servlet.jsp.*,
+  com.petebevin.markdown.MarkdownProcessor,
   no.priv.garshol.topicmaps.tmphoto.*"
   contentType="text/html; charset=utf-8"%>
 <%
   String photo_url = 
     pageContext.getServletContext().getInitParameter("photo-server");
   boolean has_comments =
-    pageContext.getServletContext().getInitParameter("score_database") != null &&
-    pageContext.getServletContext().getInitParameter("score_database").equals("true");
+    pageContext.getServletContext().getInitParameter("jdbcurl") != null;
+  if (has_comments)
+    JDBCUtils.init(pageContext.getServletContext().getInitParameter("jdbcurl"),
+                   pageContext.getServletContext().getInitParameter("jdbcuser"),
+                   pageContext.getServletContext().getInitParameter("jdbcpasswd"));
+
   String tmrap_url = 
     pageContext.getServletContext().getInitParameter("tmrap-server");
   String gmapkey = 

@@ -34,8 +34,8 @@
 </table>
 
 <%
-  String tmid = "photos.xtm";
-  String query = request.getParameter("search");
+  String tmid = "metadata.xtm"; //"photos.xtm";
+  String query = StringUtils.transcodeUTF8(request.getParameter("search"));
 
   NavigatorApplicationIF navApp = NavigatorUtils.getNavigatorApplication(pageContext);
   TopicMapIF topicmap = navApp.getTopicMapById(tmid);
@@ -43,7 +43,7 @@
   StringifierIF strify = TopicStringifiers.getDefaultStringifier();
 
   Properties props = new Properties();
-  props.setProperty("python.path", "/usr/local/java/jython-2.1/Lib");
+  props.setProperty("python.path", "/usr/local/java/jython-2.5/Lib");
   PythonInterpreter.initialize(System.getProperties(), props,
                              new String[] {""});
 
@@ -56,7 +56,7 @@
   interpreter.set("TopicStringifiers", TopicStringifiers.class);
   interpreter.set("qp", QueryUtils.getQueryProcessor(topicmap));
   interpreter.setOut(out);
-  interpreter.execfile("webapps/tmphoto/tst.py");
+  interpreter.execfile("webapps/tmphoto/sem-search.py");
 %>
 
 <p>
