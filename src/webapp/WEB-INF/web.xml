@@ -23,7 +23,7 @@
 
   <context-param>
     <param-name>image-processor</param-name>
-    <param-value>no.priv.garshol.topicmaps.tmphoto.images.AWTProcessor</param-value>
+    <param-value>no.priv.garshol.topicmaps.tmphoto.images.ImageMagickCLIProcessor</param-value>
   </context-param>
 
   <context-param>
@@ -35,12 +35,21 @@
     <param-name>image-cache-dir</param-name>
     <param-value>/tmp</param-value>
   </context-param-->
-  
-  <context-param>
-    <param-name>score_database</param-name>
-    <param-value>false</param-value>
-  </context-param>
 
+  <!-- if these are commented out datbase support is automatically turned off -->
+  <context-param>
+    <param-name>jdbcurl</param-name>
+    <param-value>jdbc:postgresql:tmphoto</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jdbcuser</param-name>
+    <param-value>larsga</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jdbcpasswd</param-name>
+    <param-value>secret</param-value>
+  </context-param>
+  
   <servlet>
     <servlet-name>FrontController</servlet-name>
     <display-name>FrontController</display-name>

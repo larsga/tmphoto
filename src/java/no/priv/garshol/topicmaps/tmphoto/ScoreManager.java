@@ -8,11 +8,8 @@ import java.util.HashMap;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.net.MalformedURLException;
-import java.sql.Statement;
 import java.sql.ResultSet;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.DriverManager;
 
 import net.ontopia.utils.OntopiaRuntimeException;
 import net.ontopia.infoset.core.LocatorIF;
@@ -22,81 +19,63 @@ import net.ontopia.topicmaps.core.TopicMapIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 
 public class ScoreManager {
-  private static String JDBCURL = "jdbc:postgresql:tmphoto";
-  private static String USER = "larsga";
-  private static String PASSWORD = "u54raud";
 
   public static void setScore(String photoid, String username, int score)
     throws SQLException {
-    int id = queryForInt("select id " +
-                         "from PHOTO_SCORE " +
-                         "where photo = '" + photoid +
-                         "' and username = '" + username + "';", 0);
+    int id = JDBCUtils.queryForInt("select id " +
+                                   "from PHOTO_SCORE " +
+                                   "where photo = '" + photoid +
+                                   "' and username = '" + username + "';", 0);
+    String query;
     if (id == 0)
       // this is the first score from this user
-      update("insert into PHOTO_SCORE values (default, '" + photoid + "', " +
-             "'" + username + "', " + score + ", now());");
+      query = "insert into PHOTO_SCORE values (default, '" + photoid + "', " +
+              "'" + username + "', " + score + ", now());";
     else
-      update("update PHOTO_SCORE set score = " + score + ", updated=now() " +
-             "where id = " + id + ";");
+      query = "update PHOTO_SCORE set score = " + score + ", updated=now() " +
+              "where id = " + id + ";";
+
+    JDBCUtils.update(query);
   }
 
   public static int getScore(String photoid, String username)
     throws SQLException {
-    return queryForInt("select score " +
-                       "from PHOTO_SCORE " +
-                       "where photo = '" + photoid +
-                       "' and username = '" + username + "';", 0);
+    return JDBCUtils.queryForInt("select score " +
+                                 "from PHOTO_SCORE " +
+                                 "where photo = '" + photoid +
+                                 "' and username = '" + username + "';", 0);
   }
 
   public static int getVoteCount(String photoid)
     throws SQLException {
-    return queryForInt("select count(*) " +
-                       "from PHOTO_SCORE " +
-                       "where photo = '" + photoid + "';", 0);
+    return JDBCUtils.queryForInt("select count(*) " +
+                                 "from PHOTO_SCORE " +
+                                 "where photo = '" + photoid + "';", 0);
   }
   
   public static double getAverageScore(String photoid) throws SQLException {
-    return queryForDouble("select avg(score) " +
-                          "from PHOTO_SCORE " +
-                          "where photo = '" + photoid + "'", 0);
+    return JDBCUtils.queryForDouble("select avg(score) " +
+                                    "from PHOTO_SCORE " +
+                                    "where photo = '" + photoid + "'", 0);
   }
 
   public static Map getAverageScores(Collection photos) throws SQLException {
     Map averages = new HashMap();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
+    JDBCUtils.RowMapperIF builder = new StringDoubleMapBuilder(averages);
 
-      List chunks = breakIntoChunks(photos, 50);
-      Iterator it = chunks.iterator();
-      while (it.hasNext()) {
-        Collection chunk = (Collection) it.next();
-        stmt.execute("select photo, avg(score) as average " +
+    List chunks = breakIntoChunks(photos, 50);
+    Iterator it = chunks.iterator();
+    while (it.hasNext()) {
+      Collection chunk = (Collection) it.next();
+      String query = "select photo, avg(score) as average " +
                      "from PHOTO_SCORE " +
-                     "where photo in (" + toParamList(chunk) + ")" +
-                     "group by photo ");
-        rs = stmt.getResultSet();
-        List list = new ArrayList(50);
-        while (rs.next()) {
-          String id = rs.getString("photo");
-          double av = rs.getDouble("average");
-          averages.put(id, new Double(av));
-        }
-      }
-      
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
+                     "where photo in (" + JDBCUtils.toParamList(chunk) + ")" +
+                     "group by photo ";
+      JDBCUtils.queryForList(query, builder);
     }
+      
     return averages;
-  }
+  }  
 
   private static List breakIntoChunks(Collection items, int chunksize) {
     List chunks = new ArrayList((items.size() / chunksize) + 1);
@@ -118,32 +97,24 @@ public class ScoreManager {
     return chunks;
   }
 
-  private static String toParamList(Collection topics) {
-    StringBuffer buf = new StringBuffer();
-    Iterator it = topics.iterator();
-    while (it.hasNext()) {
-      TopicIF topic = (TopicIF) it.next();
-      buf.append("'" + getId(topic) + "'");
-      if (it.hasNext())
-        buf.append(", ");
-    }
-    return buf.toString();
-  }
+  public static class StringDoubleMapBuilder implements JDBCUtils.RowMapperIF {
+    private Map themap;
 
-  private static String getId(TopicIF photo) {
-    Iterator it = photo.getItemIdentifiers().iterator();
-    while (it.hasNext()) {
-      LocatorIF loc = (LocatorIF) it.next();
-      String url = loc.getAddress();
-      int pos = url.indexOf('#');
-      if (pos != -1)
-        return url.substring(pos + 1);
+    public StringDoubleMapBuilder(Map themap) {
+      this.themap = themap;
     }
-    return null;
+    
+    public Object map(ResultSet rs) throws SQLException {
+      String id = rs.getString("photo");
+      double av = rs.getDouble("average");
+      themap.put(id, new Double(av));
+      return null;
+    }
   }
 
   public static int getPhotosWithVotesCount() throws SQLException {
-    return queryForInt("select count(distinct photo) from PHOTO_SCORE", 0);
+    return JDBCUtils.queryForInt("select count(distinct photo) from PHOTO_SCORE",
+                                 0);
   }
 
   public static List getBestPhotos() throws SQLException {
@@ -151,186 +122,85 @@ public class ScoreManager {
   }
   
   public static List getBestPhotos(int offset) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      String chunk = "";
-      if (offset != -1)
-        chunk = "limit 50 offset " + offset;
-      stmt.execute("select photo, avg(score) as average, count(score) as votes " +
-                   "from PHOTO_SCORE " +
-                   "group by photo " +
-                   "order by average desc, votes desc " + chunk);
-      rs = stmt.getResultSet();
-      List list = new ArrayList(50);
-      while (rs.next())
-        list.add(new PhotoInList(rs.getString("photo"),
-                                 rs.getDouble("average"),
-                                 rs.getInt("votes")));
-      return list;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
+    String chunk = "";
+    if (offset != -1)
+      chunk = "limit 50 offset " + offset;
+    return JDBCUtils.queryForList(
+      "select photo, avg(score) as average, count(score) as votes " +
+      "from PHOTO_SCORE " +
+      "group by photo " +
+      "order by average desc, votes desc " + chunk,
+      new PhotoInListBuilder3());
   }
 
-  public static List getUserFavourites(String user, int offset)
+  public static List getUserFavourites(String user, int offset) 
     throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute("select photo, score " +
-                   "from PHOTO_SCORE " +
-                   "where username='" + user + "' " +
-                   "order by score desc, updated desc limit 50 offset " + offset);
-      rs = stmt.getResultSet();
-      List list = new ArrayList(50);
-      while (rs.next())
-        list.add(new PhotoInList(rs.getString("photo"),
-                                 rs.getInt("score"),
-                                 0));
-      return list;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
+    return JDBCUtils.queryForList(
+      "select photo, score " +
+      "from PHOTO_SCORE " +
+      "where username='" + user + "' " +
+      "order by score desc, updated desc limit 50 offset " + offset,
+      new PhotoInListBuilder());
   }
   
   public static List getRecentVotes() throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute("select * " +
-                   "from PHOTO_SCORE " +
-                   "where username!='larsga' " +
-                   "order by updated desc limit 50");
-
-      rs = stmt.getResultSet();
-      List list = new ArrayList(50);
-      while (rs.next())
-        list.add(new PhotoInList(rs.getString("photo"),
-                                 rs.getDouble("score"),
-                                 -1,
-                                 rs.getString("username")));
-      return list;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
+    return JDBCUtils.queryForList(
+      "select * " +
+      "from PHOTO_SCORE " +
+      "where username!='larsga' " +
+      "order by updated desc limit 50", new PhotoInListBuilder2());
   }
 
   public static List getAllVotes() throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute("select * " +
-                   "from PHOTO_SCORE");
-
-      rs = stmt.getResultSet();
-      List list = new ArrayList(50);
-      while (rs.next())
-        list.add(new PhotoInList(rs.getString("photo"),
-                                 rs.getDouble("score"),
-                                 -1,
-                                 rs.getString("username")));
-      return list;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
+    return JDBCUtils.queryForList("select * from PHOTO_SCORE",
+                                  new PhotoInListBuilder2());
   }
   
   public static List getVotingStats() throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute("select username, count(score) as votes, avg(score) as average " +
-                   "from photo_score " +
-                   "group by username " +
-                   "order by votes desc");
-      rs = stmt.getResultSet();
-      List list = new ArrayList(50);
-      while (rs.next())
-        list.add(new UserInList(rs.getString("username"),
-                                rs.getInt("votes"),
-                                rs.getDouble("average")));
-      return list;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
+    return JDBCUtils.queryForList(
+      "select username, count(score) as votes, avg(score) as average " +
+      "from photo_score " +
+      "group by username " +
+      "order by votes desc", new UserInListBuilder());
   }
 
   /**
    * Initializes the 'average vote' occurrences on photo topics.
    */
   public static void getAverageVotes(TopicMapIF topicmap) throws SQLException {
-    TopicIF avg = getTopicByPsi(topicmap,
-                                "http://psi.ontopia.net/tmphoto/#average-vote");
-    TopicMapBuilderIF builder = topicmap.getBuilder();
-    
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute("select photo, avg(score) as average, count(score) as votes "+
+    String query = "select photo, avg(score) as average, count(score) as votes "+
                    "from photo_score " +
-                   "group by photo");
+                   "group by photo";
+    JDBCUtils.queryForList(query, new AverageSetter(topicmap));
+  }
 
-      rs = stmt.getResultSet();
-      while (rs.next()) {
-        String id = rs.getString("photo");
-        double score = rs.getDouble("average");
-        int votes = rs.getInt("votes");
+  public static class AverageSetter implements JDBCUtils.RowMapperIF {
+    private TopicMapIF topicmap;
+    private TopicMapBuilderIF builder;
+    private TopicIF avg;
 
-        TopicIF photo = getTopic(topicmap, id);
-        if (photo != null)
-          builder.makeOccurrence(photo, avg, "" + score);
-      }
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
-      }
+    public AverageSetter(TopicMapIF topicmap) {
+      this.topicmap = topicmap;
+      avg = getTopicByPsi(topicmap, "http://psi.ontopia.net/tmphoto/#average-vote");
+      builder = topicmap.getBuilder();
+    }
+    
+    public Object map(ResultSet rs) throws SQLException {
+      String id = rs.getString("photo");
+      double score = rs.getDouble("average");
+      int votes = rs.getInt("votes");
+      
+      TopicIF photo = getTopic(topicmap, id);
+      if (photo != null)
+        builder.makeOccurrence(photo, avg, "" + score);
+
+      return null;
     }
   }
 
   public static void deleteVotesOn(String photoid) throws SQLException {
-    update("delete from PHOTO_SCORE " +
-           "       where photo = '" + photoid + "'");
+    JDBCUtils.update("delete from PHOTO_SCORE " +
+                     "       where photo = '" + photoid + "'");
   }
   
   // --- internal methods
@@ -352,6 +222,31 @@ public class ScoreManager {
 
   // --- internal class
 
+  public static class PhotoInListBuilder implements JDBCUtils.RowMapperIF {
+    public Object map(ResultSet rs) throws SQLException {
+      return new PhotoInList(rs.getString("photo"),
+                             rs.getInt("score"),
+                             0);
+    }
+  }
+
+  public static class PhotoInListBuilder2 implements JDBCUtils.RowMapperIF {
+    public Object map(ResultSet rs) throws SQLException {
+      return new PhotoInList(rs.getString("photo"),
+                             rs.getInt("score"),
+                             -1,
+                             rs.getString("username"));
+    }
+  }
+
+  public static class PhotoInListBuilder3 implements JDBCUtils.RowMapperIF {
+    public Object map(ResultSet rs) throws SQLException {
+      return new PhotoInList(rs.getString("photo"),
+                             rs.getDouble("average"),
+                             rs.getInt("votes"));
+    }
+  }
+  
   public static class PhotoInList {
     private String id;
     private double score;
@@ -385,6 +280,14 @@ public class ScoreManager {
       return user;
     }
   }
+
+  public static class UserInListBuilder implements JDBCUtils.RowMapperIF {
+    public Object map(ResultSet rs) throws SQLException {
+      return new UserInList(rs.getString("username"),
+                            rs.getInt("votes"),
+                            rs.getDouble("average"));
+    }
+  }
   
   public static class UserInList {
     private String user;
@@ -409,71 +312,4 @@ public class ScoreManager {
       return average;
     }
   }  
-    
-  // --- private stuff
-
-  private static Statement getStatement() throws SQLException {
-    try {
-      Class.forName("org.postgresql.Driver");
-    } catch (Exception e) {
-      throw new net.ontopia.utils.OntopiaRuntimeException(e);
-    }
-    
-    Connection conn = DriverManager.getConnection(JDBCURL, USER, PASSWORD);
-    return conn.createStatement();
-  }
-
-  private static int queryForInt(String query, int default_) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute(query);
-      rs = stmt.getResultSet();
-      if (rs.next())
-        return rs.getInt(1);
-      else
-        return default_;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
-  }
-
-  private static double queryForDouble(String query, double default_) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = getStatement();
-      stmt.execute(query);
-      rs = stmt.getResultSet();
-      if (rs.next())
-        return rs.getDouble(1);
-      else
-        return default_;
-    } finally {
-      if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        rs.close();
-        stmt.close();
-        conn.close();
-      }
-    }
-  }
-
-  private static void update(String query) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = getStatement();
-      stmt.executeUpdate(query);
-    } finally {
-      Connection conn = stmt.getConnection();
-      stmt.close();
-      conn.close();
-    }    
-  }
 }

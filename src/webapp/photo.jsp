@@ -201,9 +201,12 @@ order by $DATE limit 1?
   String scoreurl = "";
   double average = 0;
   int votes = 0;
+  List comments = null;
   if (has_comments) {
     average = ScoreManager.getAverageScore(id);
     votes = ScoreManager.getVoteCount(id);
+    comments = CommentManager.getCommentsOnPhoto(request.getParameter("id"));
+    pageContext.setAttribute("comments", comments);
 %>
 <span title="Average vote, out of <%= votes %> votes is <%= average %>">
 <%
@@ -230,6 +233,9 @@ order by $DATE limit 1?
      onmouseover="moveonto(5)" onmouseout="moveoff(5)" onclick="vote(5)">
 </form>
 </span>
+
+&nbsp;&nbsp;&nbsp;
+Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comment')">+</a>
 <% } // end of if has_comments %>
 
 <br>
@@ -268,8 +274,59 @@ order by $DATE limit 1?
 </tolog:foreach>
 </ul>
 </tolog:if>
-
 </table>
+
+<% if (has_comments) { %>
+<div id=fcomment class=hidden>
+<h2>Comments (<%= comments.size() %>)</h2>
+
+<c:choose>
+  <c:when test="${empty comments}">
+    <p>No comments yet.
+  </c:when>
+  <c:otherwise>
+    <c:forEach items="${comments}" var="comment">
+      <tolog:query name="findperson">
+        userman:username($PERSON, "<c:out value="${comment.user}"/>")?
+      </tolog:query>
+      <tolog:set var="person" query="findperson"/>
+      <p><b><a href="person.jsp?id=<tolog:id var="person"/>"
+              ><tolog:out var="person"/></a></b> - 
+         <c:out value="${comment.formattedDatetime}"/></p>
+      <blockquote>
+        <c:out value="${comment.formattedContent}" escapeXml="false"/>
+      </blockquote>
+    </c:forEach>
+  </c:otherwise>
+</c:choose>
+
+<% if (request.getParameter("preview") != null) { %>
+<div class=commentpreview>
+  <p><b><%= username %></b> - <i>unknown</i></p>
+  <blockquote>
+  <%= MarkdownUtils.format(request.getParameter("preview")) %>
+  </blockquote>
+</div>
+<% } %>
+
+<tolog:if var="username">
+  <form action="add-comment.jsp" method="post">
+  <input type=hidden name=id value="<tolog:id var="photo"/>">
+  <table>
+  <tr><th width="20%">Username <td><%= username %>
+  <tr><td colspan=2><a name="comment"></a>
+  <textarea name=comment cols=60 rows=10 
+    ><% if (request.getParameter("preview") != null) { 
+      %><%= request.getParameter("preview") %><%
+       } %></textarea><br>
+  <input type=submit value="Add"     name=add> 
+  <input type=submit value="Preview" name=preview>
+  <a href="markdown.jsp" target="blank">formatting help</a>
+  </form>
+</tolog:if>
+</div>
+
+<% } %>
 
 <% if (has_comments) { %>
 <script>
@@ -334,6 +391,10 @@ function vote(number) {
     alert("Problem: " + xmlhttp.readyState + ", " + xmlhttp.status);
   }
 }
+
+<% if (request.getParameter("preview") != null) { %>
+swap("comment");
+<% } %>
 </script>
 <% } %>
 

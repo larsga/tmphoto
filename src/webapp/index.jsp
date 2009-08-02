@@ -33,17 +33,10 @@
 </p>
 </tolog:if>
 
-<p>
-  <tolog:out query="dc:description(%reifier%, $DESC)?"/>
-</p>
+  <tolog:if query="dc:description(%reifier%, $DESC)?">
+    <%= MarkdownUtils.format(pageContext, "DESC") %>
+  </tolog:if>
 </tolog:if>
-
-<p>Note that photos showing many people and places are hidden for
-privacy reasons. To see these you need to <a href="login.jsp">log
-in</a>. To get a password you need to email me.  </p>
-
-<p>You can read more about the application 
-<a href="http://www.garshol.priv.no/blog/126.html">on my blog</a>.</p>
 
 <%-- LEFT-HAND CELL --%>
 <table width="100%"><tr><td>
