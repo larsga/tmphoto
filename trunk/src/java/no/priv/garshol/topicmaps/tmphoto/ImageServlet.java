@@ -18,6 +18,10 @@ import javax.servlet.http.*;
 import net.ontopia.utils.StreamUtils;
 import net.ontopia.infoset.core.LocatorIF;
 import net.ontopia.topicmaps.core.*;
+import net.ontopia.topicmaps.query.core.QueryResultIF;
+import net.ontopia.topicmaps.query.core.QueryProcessorIF;
+import net.ontopia.topicmaps.query.core.InvalidQueryException;
+import net.ontopia.topicmaps.query.utils.QueryUtils;
 import net.ontopia.topicmaps.entry.TopicMapReferenceIF;
 import net.ontopia.topicmaps.entry.TopicMapRepositoryIF;
 import net.ontopia.topicmaps.nav2.utils.NavigatorUtils;
@@ -63,11 +67,12 @@ public class ImageServlet extends HttpServlet {
     // initialize
     String id = getImageId(req);
     String size = getImageSize(req);
-    File origfile = getImageFile(id);
-    if (origfile == null) {
+    TopicIF imagetopic = getImageTopic(id);
+    if (imagetopic == null) {
       resp.sendError(404, "No such image");
       return;
     }
+    File origfile = getImageFile(imagetopic);
 
     // does the client have the latest?
     String ifmod = req.getHeader("If-Modified-Since");
@@ -75,6 +80,19 @@ public class ImageServlet extends HttpServlet {
       long time = parseTime(ifmod);
       if (time >= origfile.lastModified()) {
         resp.sendError(304, "Not changed");
+        return;
+      }
+    }
+
+    // is the user logged in?
+    HttpSession session = req.getSession();
+    String username = null;
+    if (req != null)
+      username = (String) session.getAttribute("username");
+    if (username == null) {
+      // only users which have logged in can get full-size images
+      if (size.equals("full") || isImageHidden(imagetopic)) {
+        resp.sendError(403, "Forbidden");
         return;
       }
     }
@@ -152,7 +170,12 @@ public class ImageServlet extends HttpServlet {
       throw new RuntimeException("Unknown size: '" + size + "'");
   }
   
-  private File getImageFile(String id) throws IOException {
+  private File getImageFile(TopicIF topic) throws IOException {
+    LocatorIF subjloc = (LocatorIF) topic.getSubjectLocators().iterator().next();
+    return new File(subjloc.getAddress().substring(6));
+  }
+
+  private TopicIF getImageTopic(String id) throws IOException {
     // get topic map
     TopicMapRepositoryIF repo =
       NavigatorUtils.getTopicMapRepository(getServletContext());
@@ -163,13 +186,30 @@ public class ImageServlet extends HttpServlet {
     // get image topic
     LocatorIF base = store.getBaseAddress();
     LocatorIF iid = base.resolveAbsolute("#" + id);
-    TopicIF topic = (TopicIF) tm.getObjectByItemIdentifier(iid);
-    if (topic == null)
-      return null;
+    return (TopicIF) tm.getObjectByItemIdentifier(iid);
+  }
 
-    // locate image
-    LocatorIF subjloc = (LocatorIF) topic.getSubjectLocators().iterator().next();
-    return new File(subjloc.getAddress().substring(6));
+  private static boolean isImageHidden(TopicIF topic) {
+    Map params = new HashMap();
+    params.put("photo", topic);
+
+    // FIXME: this could be pre-parsed
+    QueryProcessorIF qp = QueryUtils.getQueryProcessor(topic.getTopicMap());
+    try {
+      QueryResultIF result = qp.execute(
+        "using ph for i\"http://psi.garshol.priv.no/tmphoto/\" " +
+        "using op for i\"http://psi.ontopedia.net/\" " +
+        "{ ph:depicted-in(%photo% : ph:depiction, $PERSON : ph:depicted), " +
+        "ph:hide($PERSON : ph:hidden) " +
+        "| ph:hide(%photo% : ph:hidden) " +
+        "| ph:taken-at(%photo% : op:Image, $PLACE : op:Place), " +
+        "  ph:hide($PLACE : ph:hidden) " +
+        "| ph:taken-during(%photo% : op:Image, $EVENT : op:Event), " +
+        "  ph:hide($EVENT : ph:hidden) }?", params);
+      return (result.next());
+    } catch (InvalidQueryException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static String getImageId(HttpServletRequest req) {
