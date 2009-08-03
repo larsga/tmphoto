@@ -7,7 +7,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Date;
 import java.util.HashMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -27,6 +30,9 @@ import no.priv.garshol.topicmaps.tmphoto.images.*;
  */
 public class ImageServlet extends HttpServlet {
   static private int active_workers = 0;
+  // last-mod/if-mod headers: Fri, 11 Jul 2008 16:20:56 GMT
+  static private SimpleDateFormat f =
+    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
   private ImageProcessor improc;
   private String cachedir;
   private int maxworkers;
@@ -36,7 +42,7 @@ public class ImageServlet extends HttpServlet {
 
     // set up image processor
     String klass = getParameter(config, "image-processor",
-      "no.priv.garshol.topicmaps.tmphoto.images.JAIProcessor");
+      "no.priv.garshol.topicmaps.tmphoto.images.AWTProcessor");
     improc = (ImageProcessor) instantiate(klass);
 
     // set up cache directory
@@ -57,18 +63,29 @@ public class ImageServlet extends HttpServlet {
     // initialize
     String id = getImageId(req);
     String size = getImageSize(req);
-    String origfile = getImageFileName(id);
+    File origfile = getImageFile(id);
     if (origfile == null) {
       resp.sendError(404, "No such image");
       return;
     }
 
+    // does the client have the latest?
+    String ifmod = req.getHeader("If-Modified-Since");
+    if (ifmod != null) {
+      long time = parseTime(ifmod);
+      if (time >= origfile.lastModified()) {
+        resp.sendError(304, "Not changed");
+        return;
+      }
+    }
+    
     // get reference to scaled image (and scale, if necessary)
     File scaledfile = getScaledFile(id, origfile, size);
-
+    
     // pump it out!
     resp.setHeader("Content-type", "image/jpeg");
     resp.setIntHeader("Content-length", (int) scaledfile.length());
+    resp.setHeader("Last-Modified", formatDate(origfile));
     OutputStream out = resp.getOutputStream();
     FileInputStream in = new FileInputStream(scaledfile);
     try {
@@ -81,14 +98,14 @@ public class ImageServlet extends HttpServlet {
   
   // --- Internal helpers
 
-  private File getScaledFile(String id, String origfile, String size)
+  private File getScaledFile(String id, File origfile, String size)
     throws IOException {
     if (size.equals("full"))
-      return new File(origfile);
+      return origfile;
 
     File scaledfile = new File(cachedir + size + File.separator + id + ".jpg");
-    if (!scaledfile.exists())
-      scaleImage(new File(origfile), scaledfile, getMaxSide(size));
+    if (!scaledfile.exists() || newer(origfile, scaledfile))
+      scaleImage(origfile, scaledfile, getMaxSide(size));
     
     return scaledfile;
   }
@@ -108,6 +125,10 @@ public class ImageServlet extends HttpServlet {
     } finally {
       decrement();
     }
+  }
+
+  private boolean newer(File f1, File f2) {
+    return f1.lastModified() > f2.lastModified();
   }
 
   private synchronized boolean canRun() {
@@ -131,7 +152,7 @@ public class ImageServlet extends HttpServlet {
       throw new RuntimeException("Unknown size: '" + size + "'");
   }
   
-  private String getImageFileName(String id) throws IOException {
+  private File getImageFile(String id) throws IOException {
     // get topic map
     TopicMapRepositoryIF repo =
       NavigatorUtils.getTopicMapRepository(getServletContext());
@@ -148,7 +169,7 @@ public class ImageServlet extends HttpServlet {
 
     // locate image
     LocatorIF subjloc = (LocatorIF) topic.getSubjectLocators().iterator().next();
-    return subjloc.getAddress().substring(6);
+    return new File(subjloc.getAddress().substring(6));
   }
 
   private static String getImageId(HttpServletRequest req) {
@@ -201,5 +222,18 @@ public class ImageServlet extends HttpServlet {
     if (param == null)
       param = default_;
     return param;
+  }
+
+  private static String formatDate(File file) {
+    return f.format(new Date(file.lastModified()));
  }
+
+  private static long parseTime(String time) {
+    try {
+      return f.parse(time).getTime();
+    } catch (ParseException e) {
+      System.out.println("Badly formatted date: " + time);
+      return 0; // we just ignore this
+    }
+  }
 }
