@@ -2,10 +2,11 @@
 package no.priv.garshol.topicmaps.tmphoto;
 
 import java.io.File;
+import java.io.Writer;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Date;
 import java.util.HashMap;
@@ -96,6 +97,12 @@ public class ImageServlet extends HttpServlet {
         return;
       }
     }
+
+    // did the user request metadata instead of an image?
+    if (size.equals("metadata")) {
+      sendMetadata(resp, origfile);
+      return;
+    }
     
     // get reference to scaled image (and scale, if necessary)
     File scaledfile = getScaledFile(id, origfile, size);
@@ -116,6 +123,19 @@ public class ImageServlet extends HttpServlet {
   
   // --- Internal helpers
 
+  private void sendMetadata(HttpServletResponse resp, File origfile)
+    throws IOException {
+    resp.setHeader("Content-type", "text/html; charset=utf-8");
+    resp.setHeader("Last-Modified", formatDate(origfile));
+
+    Map<String, String> metadata = EXIFExtractor.extractMetadata(origfile, false);
+    Writer out = resp.getWriter();
+    out.write("<table>");
+    for (String field : metadata.keySet())
+      out.write("<tr><td>" + field + "<td>" + metadata.get(field));
+    out.write("</table>");
+  }
+  
   private File getScaledFile(String id, File origfile, String size)
     throws IOException {
     if (size.equals("full"))
