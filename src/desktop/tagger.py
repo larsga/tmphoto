@@ -1487,7 +1487,7 @@ def get_metadata(filename):
         if datetime[4] == ":" and datetime[7] == ":":
             datetime = datetime[ : 4] + "-" + datetime[5 : 7] + "-" + datetime[8 : ]
             metadata["Date/Time"] = datetime
-            print datetime
+            #print datetime
 
     return metadata
 
@@ -1608,7 +1608,7 @@ def scan(directory, the_event):
         if tm.getTopicBySubjectLocator(locator):
             continue # we already have this picture
 
-        print file
+        #print file
 
         topic = builder.makeTopic()
         add_topic_id(topic)
