@@ -35,6 +35,11 @@ public class LoadAveragesServlet extends HttpServlet {
     if (hasrun)
       return;
 
+    // initialize JDBC utilities
+    JDBCUtils.init(getServletContext().getInitParameter("jdbcurl"),
+                   getServletContext().getInitParameter("jdbcuser"),
+                   getServletContext().getInitParameter("jdbcpasswd"));
+    
     log.info("running");
     hasrun = true;
     String id = "metadata.xtm";
@@ -64,6 +69,7 @@ public class LoadAveragesServlet extends HttpServlet {
     try {
       it = ScoreManager.getBestPhotos().iterator();
     } catch (java.sql.SQLException e) {
+      log.error("Can't get photos", e);
       throw new OntopiaRuntimeException(e);
     }
     int count = 0;
