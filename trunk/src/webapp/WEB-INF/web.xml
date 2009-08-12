@@ -23,7 +23,7 @@
 
   <context-param>
     <param-name>image-processor</param-name>
-    <param-value>no.priv.garshol.topicmaps.tmphoto.images.ImageMagickCLIProcessor</param-value>
+    <param-value>no.priv.garshol.topicmaps.tmphoto.images.AWTProcessor</param-value>
   </context-param>
 
   <context-param>
