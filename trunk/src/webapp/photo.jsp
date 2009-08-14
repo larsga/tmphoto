@@ -182,7 +182,7 @@ order by $DATE limit 1?
 <tolog:if query='%username% = "larsga"?'>
 &nbsp;&nbsp;&nbsp;
 <a href="delete-photo.jsp?id=<tolog:id var="photo"/><% if (pageContext.getAttribute("next") != null) { %>&photo=<tolog:id var="next"/><% } %>"
-   onclick="return confirmDelete()"><img src="resources/remove.gif"></a>
+   onclick="return confirmDelete('photo')"><img src="resources/remove.gif"></a>
 </tolog:if>
 </tolog:if>
 
@@ -235,7 +235,7 @@ order by $DATE limit 1?
 </span>
 
 &nbsp;&nbsp;&nbsp;
-Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comment')">+</a>
+Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comment')">-</a>
 <% } // end of if has_comments %>
 
 <br>
@@ -277,7 +277,7 @@ Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comme
 </table>
 
 <% if (has_comments) { %>
-<div id=fcomment class=hidden>
+<div id=fcomment class=visible>
 <h2>Comments (<%= comments.size() %>)</h2>
 
 <c:choose>
@@ -292,7 +292,14 @@ Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comme
       <tolog:set var="person" query="findperson"/>
       <p><b><a href="person.jsp?id=<tolog:id var="person"/>"
               ><tolog:out var="person"/></a></b> - 
-         <c:out value="${comment.formattedDatetime}"/></p>
+         <c:out value="${comment.formattedDatetime}"/>
+
+      <c:if test='${comment.user == username || username == "larsga"}'>
+<a href="delete-comment.jsp?id=<c:out value="${comment.id}"/>"
+   onclick="return confirmDelete('comment')"><img src="resources/remove.gif"></a>
+      </c:if>
+
+      </p>
       <blockquote>
         <c:out value="${comment.formattedContent}" escapeXml="false"/>
       </blockquote>
@@ -391,16 +398,12 @@ function vote(number) {
     alert("Problem: " + xmlhttp.readyState + ", " + xmlhttp.status);
   }
 }
-
-<% if (request.getParameter("preview") != null) { %>
-swap("comment");
-<% } %>
 </script>
 <% } %>
 
 <script>
-function confirmDelete() {
-  return confirm('Are you sure you want to delete this photo?');
+function confirmDelete(what) {
+  return confirm('Are you sure you want to delete this ' + what + '?');
 }
 </script>
 </template:put>
