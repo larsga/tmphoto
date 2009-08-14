@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 /**
  * Processor which calls uses the java.awt APIs to scale an image.
  */
+// largely taken from http://www.rgagnon.com/javadetails/java-0243.html
 public class AWTProcessor implements ImageProcessor {
 
   public void scaleImage(File source, File destination, int maxside)
