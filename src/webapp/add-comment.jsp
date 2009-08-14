@@ -2,7 +2,7 @@
 <%
   String id = request.getParameter("id");
   String username = (String) session.getAttribute("username");
-  String comment = request.getParameter("comment");
+  String comment = net.ontopia.utils.StringUtils.transcodeUTF8(request.getParameter("comment"));
   String referrer = "photo.jsp?id=" + id;
 
   if (request.getParameter("preview") == null) {
