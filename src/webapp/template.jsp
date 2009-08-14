@@ -37,7 +37,8 @@
   <tolog:if query='{ %username% = "larsga" | %username% = "stine" |
                      %username% = "silje" }?'>
     <a href="user-votes.jsp">Vote stats</a> |
-    <a href="recent-votes.jsp">Recent votes</a>
+    <a href="recent-votes.jsp">Recent votes</a> |
+    <a href="recent-comments.jsp">Recent comments</a>
   </tolog:if>
   </tolog:if>
 </table>
