@@ -76,6 +76,9 @@
   <a href="place.jsp?id=<tolog:id var="PLACE"/>"><tolog:out var="PLACE"/></a><br>
 </tolog:if>
 <tolog:out query="ph:time-taken(%photo%, $DATE)?"/><br>
+<tolog:if query="ph:vote-score(%photo%, $AVG)?">
+  <tolog:out var="AVG"/><br>
+</tolog:if>
 
 </c:forEach>
 </table>
