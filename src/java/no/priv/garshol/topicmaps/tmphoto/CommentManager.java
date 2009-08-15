@@ -26,6 +26,10 @@ public class CommentManager {
                      JDBCUtils.quote(content) + ", null, null, null)");
   }
 
+  public static void deleteComment(int id) throws SQLException {
+    JDBCUtils.update("delete from COMMENTS where id = " + id);
+  }
+
   public static List getCommentsOnPhoto(String photoid) throws SQLException {
     return JDBCUtils.queryForList("select * from COMMENTS where photo = " +
                                   JDBCUtils.quote(photoid) +
@@ -36,6 +40,18 @@ public class CommentManager {
     return JDBCUtils.queryForList("select * from COMMENTS where username = " +
                                   JDBCUtils.quote(user) +
                                   " order by datetime desc", new CommentBuilder());
+  }
+
+  public static List getRecentComments() throws SQLException {
+    return JDBCUtils.queryForList(
+      "select * " +
+      "from COMMENTS " +
+      "order by datetime desc limit 50", new CommentBuilder());
+  }
+
+  public static List getAllComments() throws SQLException {
+    return JDBCUtils.queryForList("select * from COMMENTS",
+                                  new CommentBuilder());
   }
   
   private static void verifyString(String value, String fieldname) {
