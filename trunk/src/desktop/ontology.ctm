@@ -1,6 +1,6 @@
 %prefix op http://psi.ontopedia.net/
 %prefix ph http://psi.garshol.priv.no/tmphoto/
-%prefix tmcl http://dunno.yet
+%prefix tmcl http://psi.topicmaps.org/tmcl/
 %prefix dc http://purl.org/dc/elements/1.1/
 %prefix dcc http://psi.ontopia.net/metadata/#
 %prefix userman http://psi.ontopia.net/userman/
@@ -9,7 +9,7 @@
 %prefix xtm http://www.topicmaps.org/xtm/1.0/core.xtm#
 
 # ===== TMPHOTO SYSTEM ONTOLOGY
-# Version x.x - 2009-0x-xx
+# Version 0.1 - 2009-10-21
 # This is the system ontology for the tmphoto application. This file is used
 # to seed new topic maps in tagger.py.
 # http://code.google.com/p/tmphoto/
