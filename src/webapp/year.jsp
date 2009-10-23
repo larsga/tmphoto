@@ -95,6 +95,27 @@
 
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <td>
+<!-- LIST OF MONTHS IN YEAR -->
+<tolog:query name="monthsquery">
+select $MONTH from
+  ph:time-taken($PHOTO, $TIME),
+  str:starts-with($TIME, %year%),
+  str:length($TIME, 19) /* only accept real datetime values */
+  <tolog:if var="nouser">
+    ,
+    not(ph:hide($PHOTO : ph:hidden)),
+    not(ph:hide($PLACE : ph:hidden)),
+    not(ph:depicted-in($PHOTO : ph:depiction, $PERSON : ph:depicted),
+        ph:hide($PERSON : ph:hidden))
+  </tolog:if>,
+  str:substring($MONTH, $TIME, 0, 7)
+order by $MONTH?
+</tolog:query>
+<tolog:foreach query="monthsquery">
+  <a href="month.jsp?month=<tolog:out var="MONTH"/>"
+    ><tolog:out var="MONTH"/></a><br>
+</tolog:foreach><br>
+
 <!-- FILTERS -->
 <c:forEach items="${list.filters}" var="filter">
 <table width="100%" class=filterbox><tr><td>

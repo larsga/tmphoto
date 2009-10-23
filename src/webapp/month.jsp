@@ -37,6 +37,7 @@
 <tolog:set var="query">
   ph:time-taken($PHOTO, $TIME),
   str:starts-with($TIME, %month%),
+  str:length($TIME, 19), /* only accept real datetime values */
   ph:taken-at($PHOTO : op:Image, $PLACE : op:Place)
   <tolog:if var="nouser">
   ,
