@@ -53,7 +53,9 @@ Photos from <tolog:out var="place"/>
 
 <tolog:if query='subject-identifier(%place%, $PSI),
                  { str:starts-with($PSI, "http://psi.ontopedia.net") |
-                   str:starts-with($PSI, "http://psi.oasis-open.org") } ?'>
+                   str:starts-with($PSI, "http://psi.oasis-open.org") |
+                   str:starts-with($PSI, "http://dbpedia.org") |
+                   str:starts-with($PSI, "http://sws.geonames.org") } ?'>
   <p>&#x03a8; <a href="<tolog:out var="PSI"/>"><tolog:out var="PSI"/></a></p>
 </tolog:if>
 
