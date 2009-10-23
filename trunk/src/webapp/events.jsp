@@ -50,7 +50,9 @@ Events
     <h2 style="margin-top: 12pt">
     <tolog:choose> 
       <tolog:when var="YEAR">
-        <a name="y<tolog:out var="YEAR"/>"><tolog:out var="YEAR"/></a>
+        <a name="y<tolog:out var="YEAR"/>"
+          ><a href="year.jsp?year=<tolog:out var="YEAR"/>"
+          ><tolog:out var="YEAR"/></a></a>
       </tolog:when>
       <tolog:otherwise>
         No date
