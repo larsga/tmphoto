@@ -109,7 +109,10 @@ public class JDBCUtils {
   } 
 
   public static String quote(String value) {
-    return "'" + StringUtils.replace(value, "'", "''") + "'";
+    if (value == null)
+      return null;
+    else
+      return "'" + StringUtils.replace(value, "'", "''") + "'";
   }
 
   public static String toParamList(Collection topics) {
