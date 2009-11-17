@@ -84,6 +84,7 @@ Photos from <tolog:out var="place"/>
 <% } %>
 
 <tolog:set var="query">
+  /* #OPTION: optimizer.reorder = false */
   { $PLACE = %place% |
     located-in(%place%, $PLACE) },
   ph:taken-at($PLACE : op:Place, $PHOTO : op:Image),
