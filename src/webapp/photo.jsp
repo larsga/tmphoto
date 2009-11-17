@@ -290,9 +290,25 @@ Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comme
         userman:username($PERSON, "<c:out value="${comment.user}"/>")?
       </tolog:query>
       <tolog:set var="person" query="findperson"/>
-      <p><b><a href="person.jsp?id=<tolog:id var="person"/>"
-              ><tolog:out var="person"/></a></b> - 
-         <c:out value="${comment.formattedDatetime}"/>
+
+      <tolog:choose>
+      <tolog:when var="person">
+        <p><b><a href="person.jsp?id=<tolog:id var="person"/>"
+                ><tolog:out var="person"/></a></b>
+      </tolog:when>
+      <tolog:otherwise>
+        <c:choose>
+        <c:when test="${comment.url != null}">
+          <p><b><a href="<c:out value="${comment.url}"/>"
+                  ><c:out value="${comment.name}"/></a></b>
+        </c:when>
+	<c:otherwise>
+          <p><b><c:out value="${comment.name}"/></b>
+	</c:otherwise>
+	</c:choose>
+      </tolog:otherwise>
+      </tolog:choose>
+          - <c:out value="${comment.formattedDatetime}"/>
 
       <c:if test='${comment.user == username || username == "larsga"}'>
 <a href="delete-comment.jsp?id=<c:out value="${comment.id}"/>"
@@ -307,32 +323,87 @@ Comments (<%= comments.size() %>) <a id=linkcomment href="javascript:swap('comme
   </c:otherwise>
 </c:choose>
 
+<%
+ String name = request.getParameter("name");
+ if (name == null) name = "";
+ String email = request.getParameter("email");
+ if (email == null) email = "";
+ String url = request.getParameter("url");
+ if (url == null) url = "";
+%>
 <% if (request.getParameter("preview") != null) { %>
 <div class=commentpreview>
-  <p><b><%= username %></b> - <i>unknown</i></p>
+  <tolog:choose>
+    <tolog:when var="username">
+      <p><b><%= username %></b> - <i>unknown</i></p>
+    </tolog:when>
+    <tolog:otherwise>
+      <% if (url.equals("")) { %>
+        <p><b><%= name %></b> - <i>unknown</i></p>
+      <% } else { %>
+        <p><b><a href="<%= url %>"><%= name %></a></b> - <i>unknown</i></p>
+      <% } %>
+    </tolog:otherwise>
+  </tolog:choose>
   <blockquote>
   <%= MarkdownUtils.format(request.getParameter("preview")) %>
   </blockquote>
 </div>
 <% } %>
 
-<tolog:if var="username">
-  <form action="add-comment.jsp" method="post">
-  <input type=hidden name=id value="<tolog:id var="photo"/>">
-  <table>
+
+<%
+  if (request.getParameter("commentadded") != null)
+    out.write("<p><i>Your comment has been added and will show up once the " +
+              "moderator has approved it.</i></p>");  
+%>
+
+<form action="add-comment.jsp" method="post">
+<input type=hidden name=id value="<tolog:id var="photo"/>">
+<table>
+<tolog:choose>
+<tolog:when var="username">
   <tr><th width="20%">Username <td><%= username %>
   <tr><td colspan=2><a name="comment"></a>
-  <textarea name=comment cols=60 rows=10 
-    ><% if (request.getParameter("preview") != null) { 
-      %><%= request.getParameter("preview") %><%
-       } %></textarea><br>
-  <input type=submit value="Add"     name=add> 
-  <input type=submit value="Preview" name=preview>
-  <a href="markdown.jsp" target="blank">formatting help</a>
-  </form>
-</tolog:if>
+</tolog:when>
+
+<tolog:otherwise>
+  <tr><th width="20%">Name <td><input name=name size=40 
+                                value="<%= name %>">
+  <tr><th width="20%">Email <td><input name=email size=40
+        value="<%= email %>"> (optional, not published)
+  <tr><th width="20%">URL <td><input name=url size=60
+        value="<%= url %>"> (optional)
+<tr id=spam style="display: normal"
+    ><td><span title="As in, 'is this comment spam?'">Spam</span>    
+    <td><input type=checkbox name=clever checked>
+    <span class=hint><b>don't</b> check this if you want to be posted</span>
+<tr id=spam2 style="display: normal"
+    ><td><span title="As in, 'please confirm that this is not comment spam'">Not spam</span>    
+    <td><input type=checkbox name=clever2>
+    <span class=hint><b>do</b> check this if you want to be posted</span>
+</tolog:otherwise>
+</tolog:choose>
+
+<tr><td colspan=2><a name="comment"></a>
+<textarea name=comment cols=60 rows=10 
+  ><% if (request.getParameter("preview") != null) { 
+    %><%= request.getParameter("preview") %><%
+     } %></textarea><br>
+
+<input type=submit value="Add"     name=add> 
+<input type=submit value="Preview" name=preview>
+<a href="markdown.jsp" target="blank">formatting help</a>
+</table>
+</form>
 </div>
 
+<script type="text/javascript">
+document.forms[1].clever.checked = false;
+document.forms[1].clever2.checked = true;
+document.getElementById("spam").style.display = "none";
+document.getElementById("spam2").style.display = "none";
+</script>
 <% } %>
 
 <% if (has_comments) { %>
