@@ -12,20 +12,21 @@ import java.sql.SQLException;
 import java.sql.DriverManager;
 
 import net.ontopia.utils.StringUtils;
+import net.ontopia.utils.OntopiaRuntimeException;
 import net.ontopia.infoset.core.LocatorIF;
 import net.ontopia.topicmaps.core.TopicIF;
 
 public class JDBCUtils {
+  private static ConnectionPool pool;
 
-  public static Statement getStatement() throws SQLException {
-    try {
-      Class.forName("org.postgresql.Driver");
-    } catch (Exception e) {
-      throw new net.ontopia.utils.OntopiaRuntimeException(e);
-    }
-    
-    Connection conn = DriverManager.getConnection(JDBCURL, USER, PASSWORD);
-    return conn.createStatement();
+  private static Statement getStatement() throws SQLException {
+    if (pool == null)
+      pool = new ConnectionPool();
+    return pool.getStatement();
+  }
+
+  public static void dumpPool() {
+    pool.debug();
   }
 
   public static int queryForInt(String query, int default_) throws SQLException {
@@ -41,10 +42,8 @@ public class JDBCUtils {
         return default_;
     } finally {
       if (stmt != null) {
-        Connection conn = stmt.getConnection();
+        pool.replaceStatement(stmt);
         rs.close();
-        stmt.close();
-        conn.close();
       }
     }
   }
@@ -62,10 +61,8 @@ public class JDBCUtils {
         return default_;
     } finally {
       if (stmt != null) {
-        Connection conn = stmt.getConnection();
+        pool.replaceStatement(stmt);
         rs.close();
-        stmt.close();
-        conn.close();
       }
     }
   }
@@ -87,11 +84,8 @@ public class JDBCUtils {
       return list;
     } finally {
       if (stmt != null) {
-        Connection conn = stmt.getConnection();
-        if (rs != null)
-          rs.close();
-        stmt.close();
-        conn.close();
+        pool.replaceStatement(stmt);
+        rs.close();
       }
     }
   }
@@ -102,9 +96,7 @@ public class JDBCUtils {
       stmt = getStatement();
       stmt.executeUpdate(query);
     } finally {
-      Connection conn = stmt.getConnection();
-      stmt.close();
-      conn.close();
+      pool.replaceStatement(stmt);
     }    
   } 
 
@@ -156,5 +148,96 @@ public class JDBCUtils {
   
   private static String JDBCURL;
   private static String USER;
-  private static String PASSWORD;  
+  private static String PASSWORD;
+
+  // ----- CONNECTION POOL
+
+  // all manipulation of the free[] and statements[] arrays (after the
+  // constructor) takes place in one of two synchronization blocks.
+  // this ensures that there are no race conditions.
+  
+  static class ConnectionPool {
+    private static final int INITIAL_SIZE = 0;
+    private static final int MAX_SIZE     = 5;
+
+    private Statement[] statements;
+    private boolean[] free;
+    private long[] lastused;
+    private int count; // number of allocated statements at the moment
+
+    private ConnectionPool() {
+      statements = new Statement[MAX_SIZE];
+      free = new boolean[MAX_SIZE];
+      lastused = new long[MAX_SIZE];
+      for (int ix = 0; ix < INITIAL_SIZE; ix++)
+        allocateNewStatement();
+    }
+
+    private Statement getStatement() {
+      int ix = -1;
+      do {
+        synchronized (this) {
+          ix = findFreeStatement();
+          if (ix == -1 && count < MAX_SIZE)
+            ix = allocateNewStatement();
+
+          if (ix != -1) {
+            free[ix] = false;
+            lastused[ix] = System.currentTimeMillis();
+          }
+        }
+
+        // need to wait a bit before we try again
+        if (ix == -1) {
+          try {
+            Thread.sleep(10);
+          } catch (InterruptedException e) {
+            // well, so what?
+          }
+        }
+      } while (ix == -1);
+
+      return statements[ix];
+    }
+
+    private int allocateNewStatement() {
+      free[count] = true;
+      statements[count++] = createStatement();
+      return count - 1;
+    }
+
+    private int findFreeStatement() {
+      for (int ix = 0; ix < count; ix++)
+        if (free[ix])
+          return ix;
+      return -1;
+    }
+
+    private Statement createStatement() {
+      try {
+        Class.forName("org.postgresql.Driver");
+
+        Connection conn = DriverManager.getConnection(JDBCURL, USER, PASSWORD);
+        return conn.createStatement();
+      } catch (Exception e) {
+        throw new OntopiaRuntimeException(e);
+      }
+    }
+
+    private synchronized void replaceStatement(Statement stmt) {
+      for (int ix = 0; ix < count; ix++)
+        if (statements[ix] == stmt) {
+          free[ix] = true;
+          return;
+        }
+      throw new OntopiaRuntimeException("Unknown statement returned!");
+    }
+
+    private void debug() {
+      System.out.println("Connection pool has " + count + " statements");
+      for (int ix = 0; ix < count; ix++)
+        System.out.println("[" + ix + "]: " + free[ix] + " " + lastused[ix]);
+      System.out.println("Time now: " + System.currentTimeMillis());
+    }
+  }
 }
