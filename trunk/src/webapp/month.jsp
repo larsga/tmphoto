@@ -30,6 +30,13 @@
   </p>
 </c:if>
 
+<p>Sort by:
+<% if (sortby.equals("time")) { %>
+  <b>Time</b> | <a href="month.jsp?month=<tolog:out var="month"/>&sort=score">Score</a>
+<% } else { %>
+  <a href="month.jsp?month=<tolog:out var="month"/>">Time</a> | <b>Score</b>
+<% } %></p>
+
 <!-- PICTURES -->
 <table width="100%">
 <tr><td>
@@ -39,6 +46,9 @@
   str:starts-with($TIME, %month%),
   str:length($TIME, 19), /* only accept real datetime values */
   ph:taken-at($PHOTO : op:Image, $PLACE : op:Place)
+  <% if (sortby.equals("score")) { %>
+    , ph:vote-score($PHOTO, $AVG)
+  <% } %>
   <tolog:if var="nouser">
   ,
   not(ph:hide($PHOTO : ph:hidden)),
@@ -50,7 +60,11 @@
 
 <%
   String query = (String) ContextUtils.getSingleValue("query", pageContext);
-  String sort = "$TIME";
+  String sort;
+  if (sortby.equals("time"))
+    sort = "$TIME";
+  else
+    sort = "$AVG desc";
   FilteredList list = new FilteredList(pageContext, query, sort, "PHOTO",
                                        "event");
   request.setAttribute("list", list);
