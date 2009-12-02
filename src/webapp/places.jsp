@@ -34,6 +34,7 @@
   query='<%= (String) ContextUtils.getSingleValue("query", pageContext) %>'
   ownpage="places.jsp?"
   nodepage="place.jsp?"
+  imageUrl="resources/"
 />
 
 <!-- FIXME: a random photo would be nice here, too -->
