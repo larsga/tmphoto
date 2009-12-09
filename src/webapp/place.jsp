@@ -7,7 +7,16 @@
 <%@ include file="handleuser.jsp"%>
 <tolog:set var="place" reqparam="id"/>
 <tolog:choose>
-  <tolog:when var="place"> </tolog:when>
+  <tolog:when var="place">
+    <%-- because tree widget used to use object IDs, lots of search engines
+         have references to non-topic objects. so we have to verify. --%>
+    <% if (!(ContextUtils.getSingleValue("place", pageContext)
+             instanceof TopicIF)) { %>
+      <jsp:forward page="nosuch.jsp">
+        <jsp:param name="what" value="place"/>
+      </jsp:forward>
+    <% } %>
+  </tolog:when>
   <tolog:otherwise>
     <jsp:forward page="nosuch.jsp">
       <jsp:param name="what" value="place"/>
