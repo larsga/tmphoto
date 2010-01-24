@@ -54,7 +54,7 @@
     <echo>Uploading tmphoto jar file...</echo>
     <exec executable="scp">
       <arg value="${build.jars}/tmphoto.jar"/>
-      <arg value="garshol.virtual.vps-host.net:/opt/tomcat5/webapps/tmphoto/WEB-INF/lib"/>
+      <arg value="centos5.garshol.virtual.vps-host.net:/opt/tomcat6/webapps/tmphoto/WEB-INF/lib"/>
     </exec>
   </target>
 
@@ -81,6 +81,7 @@
       <fileset dir="lib">
         <patternset>
           <include name="metadata-extractor*.jar" />
+          <include name="markdownj*.jar" />
         </patternset>
       </fileset>
     </copy>
@@ -91,15 +92,16 @@
       <fileset dir="src/webapp">
         <patternset>
           <include name="**" />
-          <exclude name="lib"/>
+          <exclude name="WEB-INF/lib/**"/>
         </patternset>
       </fileset>
     </copy>
     <mkdir dir="${build.dist}/tmphoto/WEB-INF/lib"/>
     <copy todir="${build.dist}/tmphoto/WEB-INF/lib" overwrite="yes">
-      <fileset dir="lib">
+      <fileset dir="${basedir}/lib">
         <patternset>
-          <include name="*.jar" />
+          <include name="metadata-extractor*.jar" />
+          <include name="markdownj*.jar" />
         </patternset>
       </fileset>
     </copy>
