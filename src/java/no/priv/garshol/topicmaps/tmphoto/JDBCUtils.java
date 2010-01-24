@@ -43,7 +43,8 @@ public class JDBCUtils {
     } finally {
       if (stmt != null) {
         pool.replaceStatement(stmt);
-        rs.close();
+        if (rs != null)
+          rs.close();
       }
     }
   }
@@ -62,7 +63,8 @@ public class JDBCUtils {
     } finally {
       if (stmt != null) {
         pool.replaceStatement(stmt);
-        rs.close();
+        if (rs != null)
+          rs.close();
       }
     }
   }
@@ -85,7 +87,8 @@ public class JDBCUtils {
     } finally {
       if (stmt != null) {
         pool.replaceStatement(stmt);
-        rs.close();
+        if (rs != null)
+          rs.close();
       }
     }
   }
@@ -153,17 +156,20 @@ public class JDBCUtils {
   // ----- CONNECTION POOL
 
   // all manipulation of the free[] and statements[] arrays (after the
-  // constructor) takes place in one of two synchronization blocks.
-  // this ensures that there are no race conditions.
+  // constructor) takes place in synchronization blocks.  this ensures
+  // that there are no race conditions.
   
   static class ConnectionPool {
-    private static final int INITIAL_SIZE = 0;
-    private static final int MAX_SIZE     = 5;
+    private static final int INITIAL_SIZE      = 0;
+    private static final int MAX_SIZE          = 5;
+    private static final long MAX_FREE_TIME    = 15 * 60 * 1000; // milliseconds
+    private static final long REFRESH_INTERVAL = MAX_FREE_TIME * 3;
 
     private Statement[] statements;
     private boolean[] free;
     private long[] lastused;
     private int count; // number of allocated statements at the moment
+    private long lastrefresh; // time of last refresh (currentTimeMillis())
 
     private ConnectionPool() {
       statements = new Statement[MAX_SIZE];
@@ -171,9 +177,17 @@ public class JDBCUtils {
       lastused = new long[MAX_SIZE];
       for (int ix = 0; ix < INITIAL_SIZE; ix++)
         allocateNewStatement();
+      lastrefresh = System.currentTimeMillis();
     }
 
     private Statement getStatement() {
+      synchronized (this) {
+        // protecting so that we don't get several threads refreshing at
+        // the same time
+        if (System.currentTimeMillis() - lastrefresh > REFRESH_INTERVAL)
+          refresh();
+      }
+      
       int ix = -1;
       do {
         synchronized (this) {
@@ -202,6 +216,7 @@ public class JDBCUtils {
 
     private int allocateNewStatement() {
       free[count] = true;
+      lastused[count] = System.currentTimeMillis();
       statements[count++] = createStatement();
       return count - 1;
     }
@@ -238,6 +253,45 @@ public class JDBCUtils {
       for (int ix = 0; ix < count; ix++)
         System.out.println("[" + ix + "]: " + free[ix] + " " + lastused[ix]);
       System.out.println("Time now: " + System.currentTimeMillis());
+    }
+
+    private void refresh() {
+      System.out.println("Refreshing connection pool");
+      debug();
+      for (int ix = 0; ix < count; ix++) {
+        if ((!free[ix] &&
+             (System.currentTimeMillis() - lastused[ix] > MAX_FREE_TIME)) ||
+            (free[ix] && !validate(ix))) {
+          // the connection has either been out of the pool for too long,
+          // or it doesn't work any more. therefore we close it and create
+          // a new one to replace it.
+          if (!free[ix])
+            System.out.println("Statement " + ix + " out for too long");
+          else
+            System.out.println("Statement " + ix + " broken");
+          
+          try {
+            Connection c = statements[ix].getConnection();
+            statements[ix].close();
+            c.close();
+          } catch (SQLException e) {
+          }
+          statements[ix] = createStatement();
+          lastused[ix] = System.currentTimeMillis();
+          free[ix] = true;
+        }
+      }
+      lastrefresh = System.currentTimeMillis();
+    }
+
+    private boolean validate(int ix) {
+      try {
+        Connection c = statements[ix].getConnection();
+        c.getMetaData();
+        return true;
+      } catch (SQLException e) {
+        return false;
+      }
     }
   }
 }
