@@ -9,7 +9,7 @@ create table photo_score (
 
 create table comments (
   id       SERIAL primary key,
-  photo    varchar(10) not null,
+  photo    varchar(13) not null,
   verified int not null default 0,
   datetime timestamp not null,
   username varchar(15) not null,
