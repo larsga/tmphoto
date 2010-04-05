@@ -16,7 +16,8 @@ Recent comments
 
 <table>
 <%
-  Iterator it = CommentManager.getRecentComments().iterator();
+  boolean showunapproved = username.equals("larsga");  
+  Iterator it = CommentManager.getRecentComments(showunapproved).iterator();
   while (it.hasNext()) {
     CommentManager.Comment comment = (CommentManager.Comment) it.next();
     pageContext.setAttribute("comment", comment);
@@ -32,6 +33,14 @@ Recent comments
 
 <b><c:out value="${comment.user}"/></b> - <c:out value="${comment.formattedDatetime}"/><br>
 <c:out value="${comment.formattedContent}" escapeXml="false"/>
+
+<c:if test='${(!comment.isVerified) && username == "larsga"}'>
+  <a href="delete-comment.jsp?id=<c:out value="${comment.id}"/>"
+     onclick="return confirmDelete('comment')"><img src="resources/remove.gif"></a>
+  <a href="approve-comment.jsp?id=<c:out value="${comment.id}"/>"
+     >OK</a>
+</c:if>
+
 <%
     } catch (net.ontopia.topicmaps.nav2.core.NavigatorRuntimeException e) {
       // means the photo was deleted
