@@ -48,6 +48,10 @@ public class CommentManager {
     JDBCUtils.update("delete from COMMENTS where id = " + id);
   }
 
+  public static void approveComment(int id) throws SQLException {
+    JDBCUtils.update("update COMMENTS set verified = 1 where id = " + id);
+  }
+  
   public static List getCommentsOnPhoto(String photoid) throws SQLException {
     return JDBCUtils.queryForList("select * from COMMENTS where photo = " +
                                   JDBCUtils.quote(photoid) +
@@ -61,10 +65,11 @@ public class CommentManager {
                                   " order by datetime desc", new CommentBuilder());
   }
 
-  public static List getRecentComments() throws SQLException {
+  public static List getRecentComments(boolean unapproved) throws SQLException {
     return JDBCUtils.queryForList(
       "select * " +
       "from COMMENTS " +
+      (unapproved ? "" : "where verified = 1 ") +
       "order by datetime desc limit 50", new CommentBuilder());
   }
 
