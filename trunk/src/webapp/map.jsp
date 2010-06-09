@@ -28,9 +28,8 @@
     // the place icon
     var placeicon = new GIcon();
     placeicon.image = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
-//'http://www.garshol.priv.no/tmphoto/images/green-dot.gif';
-    placeicon.iconSize = new GSize(9, 9);
-    placeicon.iconAnchor = new GPoint(5, 5);
+    placeicon.iconSize = new GSize(16, 16);
+    placeicon.iconAnchor = new GPoint(8, 8);
     placeicon.infoWindowAnchor = new GPoint(9, 2);
     placeicon.infoShadowAnchor = new GPoint(18, 25);
 
