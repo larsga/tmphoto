@@ -20,7 +20,7 @@
 <%
   if (gmapkey != null) {
 %>
-<div id="map" style="width: 800px; height: 650px"></div>
+<div id="map" style="width: 100%; height: 720px"></div>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=<%= gmapkey %>" type="text/javascript"></script>    
 <script type="text/javascript">
