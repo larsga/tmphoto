@@ -38,9 +38,9 @@ Events
     <tolog:if var="nouser">
       not(ph:hide($EVENT : ph:hidden)),
     </tolog:if>
-    { ph:start-date($EVENT, $SDATE) },
+    { ph:start-date($EVENT, $SDATE),
+      { year($SDATE, $YEAR) | not(year($SDATE, $YEAR)) } },
     { ph:end-date($EVENT, $EDATE) },
-    { year($SDATE, $YEAR) | not(year($SDATE, $YEAR)) },
     ph:taken-during($PHOTO : op:Image, $EVENT : op:Event)
   order by $YEAR desc, $SDATE desc?
 </tolog:query>
