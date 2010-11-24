@@ -271,9 +271,11 @@ public class JDBCUtils {
             System.out.println("Statement " + ix + " broken");
           
           try {
-            Connection c = statements[ix].getConnection();
-            statements[ix].close();
-            c.close();
+            if (statements[ix] != null) {
+              Connection c = statements[ix].getConnection();
+              statements[ix].close();
+              c.close();
+            } // else nothing to do
           } catch (SQLException e) {
           }
           statements[ix] = createStatement();
