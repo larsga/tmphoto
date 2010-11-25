@@ -15,8 +15,8 @@
    NavigatorApplicationIF navApp = NavigatorUtils.getNavigatorApplication(pageContext);
    TopicMapIF tm = navApp.getTopicMapById(tmid);
 
-   File webapps = new File(pageContext.getServletContext().getRealPath("index.html")).getParentFile().getParentFile();
-   File outfile = new File(webapps, "omnigator" + File.separator + "WEB-INF" + File.separator + "topicmaps" + File.separator + filename);
+   String f = tm.getStore().getBaseAddress().getAddress().substring(5);
+   File outfile = new File(f);
    XTMTopicMapWriter writer = new XTMTopicMapWriter(outfile);
    writer.write(tm);
 %>
