@@ -34,13 +34,13 @@ the rankings here. All votes are welcome.</p>
 <%
   request.setAttribute("filter", new FilterContext(pageContext));
   String query = (String) ContextUtils.getSingleValue("query", pageContext);
-  String sort = "$AVG desc limit 100";
+  String sort = "$AVG desc limit 500";
   FilteredList list = new FilteredList(pageContext, query, sort, "PHOTO",
                                        "person");
   request.setAttribute("list", list);
 %>
 
-<c:set var="pagelink">best-photos.jsp</c:set>
+<c:set var="pagelink">best-photos.jsp?</c:set>
 <%@ include file="paging.jsp"%>
 
 <tolog:out var="paging" escape="no"/>

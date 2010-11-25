@@ -51,7 +51,7 @@
   request.setAttribute("list", list);
 %>
 
-<c:set var="pagelink">?search=<%= search %></c:set>
+<c:set var="pagelink">?search=<%= search %>&</c:set>
 <%@ include file="paging.jsp"%>
 
 <table width="100%"><tr><td>

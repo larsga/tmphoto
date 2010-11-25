@@ -116,7 +116,7 @@
 %>
 
 <c:set var="pagelink">event.jsp?id=<tolog:id var="event"/><%
-  if (sortby.equals("score")) { %>&sort=score<% } %></c:set>
+  if (sortby.equals("score")) { %>&sort=score<% } %>&</c:set>
 <%@ include file="paging.jsp"%>
 
 <tolog:out var="paging" escape="no"/>

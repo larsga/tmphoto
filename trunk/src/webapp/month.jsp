@@ -71,7 +71,7 @@
   int pages = (list.getRowCount() / 50) + 1;
 %>
 <c:set var="pagelink">month.jsp?month=<tolog:out var="month"/><%
-  if (sortby.equals("score")) { %>&sort=score<% } %></c:set>
+  if (sortby.equals("score")) { %>&sort=score<% } %>&</c:set>
 <%@ include file="paging.jsp"%>
 
 <tolog:out var="paging" escape="no"/>
