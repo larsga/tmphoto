@@ -6,10 +6,10 @@
 <%@ include file="handleuser.jsp"%>
 <tolog:set var="reifier" 
   query="select $TMT from topicmap($TM), reifies($TMT, $TM)?"/>
-<c:set var="place" scope="session"/>
-<c:set var="person" scope="session" value=""/>
-<c:set var="category" scope="session" value=""/>
-<c:set var="filter" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="person" scope="session" value="${null}"/>
+<c:set var="category" scope="session" value="${null}"/>
+<c:set var="filter" scope="session" value="${null}"/>
 
 <template:insert template='template.jsp'>
 <template:put name='title'>

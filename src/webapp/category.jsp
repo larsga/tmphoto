@@ -16,8 +16,8 @@
 </tolog:choose>
 <tolog:set var="topicmap" query="topicmap($TM)?"/>
 <c:set var="category" scope="session"><tolog:id var="category"/></c:set>
-<c:set var="place" scope="session" value=""/>
-<c:set var="person" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="person" scope="session" value="${null}"/>
 <%
  request.setAttribute("filter", new FilterContext(pageContext));
 
