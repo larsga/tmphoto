@@ -66,7 +66,7 @@ public class FilteredList {
     this.contextTag = FrameworkUtils.getContextTag(pageContext);
     this.filters = new HashMap();
     this.rows = build();
-    this.pagecount = (int) Math.round(Math.ceil(getRowCount() / 50));
+    this.pagecount = (int) Math.round(Math.ceil( (float) getRowCount() / (float) 50));
     this.pageno = 1;
     if (pageContext.getRequest().getParameter("n") != null)
       this.pageno = Integer.parseInt(pageContext.getRequest().getParameter("n"));
