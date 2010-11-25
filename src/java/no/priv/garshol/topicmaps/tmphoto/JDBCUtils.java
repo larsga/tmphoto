@@ -233,7 +233,10 @@ public class JDBCUtils {
         Class.forName("org.postgresql.Driver");
 
         Connection conn = DriverManager.getConnection(JDBCURL, USER, PASSWORD);
-        return conn.createStatement();
+        Statement stmt = conn.createStatement();
+        if (stmt == null) // this shouldn't be possible, should it?
+          throw new NullPointerException("Couldn't open JDBC connection");
+        return stmt;
       } catch (Exception e) {
         throw new OntopiaRuntimeException(e);
       }
@@ -287,12 +290,21 @@ public class JDBCUtils {
     }
 
     private boolean validate(int ix) {
+      ResultSet rs = null;
       try {
         Connection c = statements[ix].getConnection();
-        c.getMetaData();
+        DatabaseMetaData md = c.getMetaData();
+        rs = md.getCatalogs();
         return true;
       } catch (SQLException e) {
         return false;
+      } finally {
+        if (rs != null)
+          try {
+            rs.close();
+          } catch (SQLException e) {
+            // whatever. at least we tried
+          }
       }
     }
   }
