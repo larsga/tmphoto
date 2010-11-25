@@ -3,9 +3,9 @@
 <tolog:context topicmap="metadata.xtm">
 <%@ include file="tolog.jsp"%>
 <%@ include file="handleuser.jsp"%>
-<c:set var="place" scope="session"/>
-<c:set var="person" scope="session" value=""/>
-<c:set var="category" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="person" scope="session" value="${null}"/>
+<c:set var="category" scope="session" value="${null}"/>
 <c:set var="filter" scope="session" value=""/>
 
 <template:insert template='template.jsp'>

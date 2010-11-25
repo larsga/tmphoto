@@ -3,10 +3,10 @@
 <tolog:context topicmap="metadata.xtm">
 <%@ include file="tolog.jsp"%>
 <tolog:set var="place" reqparam="id"/>
-<c:set var="place" scope="session"/>
-<c:set var="person" scope="session" value=""/>
-<c:set var="category" scope="session" value=""/>
-<c:set var="filter" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="person" scope="session" value="${null}"/>
+<c:set var="category" scope="session" value="${null}"/>
+<c:set var="filter" scope="session" value="${null}"/>
 
 <template:insert template='template.jsp'>
 <template:put name='title'>

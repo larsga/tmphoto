@@ -29,8 +29,8 @@
   </tolog:if>
 </tolog:if>
 <c:set var="person" scope="session"><tolog:id var="person"/></c:set>
-<c:set var="place" scope="session" value=""/>
-<c:set var="category" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="category" scope="session" value="${null}"/>
 
 <template:insert template='template.jsp'>
 <template:put name='title'>

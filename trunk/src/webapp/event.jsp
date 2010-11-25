@@ -14,9 +14,9 @@
     </jsp:forward>
   </tolog:otherwise>
 </tolog:choose>
-<c:set var="place" scope="session"/>
-<c:set var="person" scope="session" value=""/>
-<c:set var="category" scope="session" value=""/>
+<c:set var="place" scope="session" value="${null}"/>
+<c:set var="person" scope="session" value="${null}"/>
+<c:set var="category" scope="session" value="${null}"/>
 <tolog:set var="topicmap" query="topicmap($TM)?"/>
 <%
   request.setAttribute("filter", new FilterContext(pageContext));
