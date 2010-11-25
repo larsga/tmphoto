@@ -124,7 +124,7 @@ Photos from <tolog:out var="place"/>
 %>
 
 <c:set var="pagelink">place.jsp?id=<tolog:id var="place"/><%
-  if (sortby.equals("score")) { %>&sort=score<% } %></c:set>
+  if (sortby.equals("score")) { %>&sort=score<% } %>&</c:set>
 <%@ include file="paging.jsp"%>
 
 <tolog:out var="paging" escape="no"/>
