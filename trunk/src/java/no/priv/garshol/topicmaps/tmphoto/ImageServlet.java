@@ -37,7 +37,7 @@ public class ImageServlet extends HttpServlet {
   static private int active_workers = 0;
   // last-mod/if-mod headers: Fri, 11 Jul 2008 16:20:56 GMT
   static private SimpleDateFormat f =
-    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzzz");
   private ImageProcessor improc;
   private String cachedir;
   private int maxworkers;
@@ -294,6 +294,9 @@ public class ImageServlet extends HttpServlet {
     } catch (ParseException e) {
       System.out.println("Badly formatted date: " + time);
       return 0; // we just ignore this
+    } catch (NumberFormatException e) {
+      System.out.println("Date format problem: '" + time + "'");
+      return 0; // serve the image anyway
     }
   }
 }
