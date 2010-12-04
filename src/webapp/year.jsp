@@ -104,7 +104,8 @@ select $MONTH from
   <tolog:if var="nouser">
     ,
     not(ph:hide($PHOTO : ph:hidden)),
-    not(ph:hide($PLACE : ph:hidden)),
+    not(ph:taken-at($PLACE : op:Place, $PHOTO : op:Image),
+        ph:hide($PLACE : ph:hidden)),
     not(ph:depicted-in($PHOTO : ph:depiction, $PERSON : ph:depicted),
         ph:hide($PERSON : ph:hidden))
   </tolog:if>,
