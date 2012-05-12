@@ -55,6 +55,7 @@ from java.lang import System
 
 from java.util import HashMap, ArrayList
 from java.io import File
+from java.awt.color import CMMException
 from com.drew.imaging.jpeg import JpegMetadataReader
 from com.drew.metadata import MetadataException
 
@@ -396,10 +397,13 @@ class ImagePanel(JPanel):
         filename = url[6 : ]
         extension = filename[-3 : ].lower()
 
-        if extension == "jpg" or extension == "gif":
-            self.setImage(ImageIO.read(File(filename)))
-        elif extension == "avi":
-            self.setVideo(filename)
+        try:
+            if extension == "jpg" or extension == "gif":
+                self.setImage(ImageIO.read(File(filename)))
+            elif extension == "avi":
+                self.setVideo(filename)
+        except CMMException, e:
+            errorbox(self, str(e))
         
 # --- AbstracTopicListComponent
 
@@ -427,12 +431,12 @@ class AbstracTopicListComponent:
     
     def getTopic(self):
         topic = None
-        
+
+        self._params.put("name", self.getSelectedString())
         result = processor.execute(PREFIXES + """
           select $TOPIC from
           %s, topic-name($TOPIC, $TN),
-          value($TN, "%s")?""" % (self._query, self.getSelectedString()),
-                                   self._params)
+          value($TN, %%name%%)?""" % (self._query), self._params)
         if result.next():
             topic = result.getValue(0)
 
@@ -443,10 +447,11 @@ class AbstracTopicListComponent:
     def getTopics(self):
         topics = []
         for string in self.getSelectedStrings():
+            self._params.put("name", string)
             result = processor.execute(PREFIXES + """
               select $TOPIC from
               %s, topic-name($TOPIC, $TN),
-              value($TN, "%s")?""" % (self._query, string), self._params)
+              value($TN, %%name%%)?""" % (self._query), self._params)
             if result.next():
                 topics.append(result.getValue(0))
 
@@ -1315,7 +1320,7 @@ class PhotoMetadataEditor:
         if exists(outfile):
             os.rename(outfile, outfile + ".bak")
         writer = ImportExportUtils.getWriter(outfile)
-        writer.setVersion(1)
+        writer.setVersion(2)
         writer.write(tm)
 
     def _open_in_gimp(self):
