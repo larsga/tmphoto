@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.DriverManager;
+import java.sql.DatabaseMetaData;
 
 import net.ontopia.utils.StringUtils;
 import net.ontopia.utils.OntopiaRuntimeException;
