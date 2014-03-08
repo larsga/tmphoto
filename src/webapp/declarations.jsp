@@ -1,6 +1,5 @@
 <%@ taglib uri='http://psi.ontopia.net/jsp/taglib/template' prefix='template'%>
 <%@ taglib uri='http://psi.ontopia.net/jsp/taglib/tolog' prefix='tolog'%>
-<%@ taglib uri='http://psi.ontopia.net/jsp/taglib/webed' prefix='webed'%>
 <%@ taglib uri='http://psi.ontopia.net/jsp/taglib/framework' prefix='framework'%>
 <%@ taglib uri='http://psi.ontopia.net/jsp/taglib/portlets' prefix='portlets'%>
 <%@ taglib uri="http://java.sun.com/jstl/core" prefix="c"%>
