@@ -162,24 +162,14 @@ Photos from <tolog:out var="place"/>
                  ph:longitude(%place%, $LONG)?">
 <div id="map" style="width: 100%; height: 200px"></div>
 
-<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=<%= gmapkey %>" type="text/javascript"></script>    
+<script src="http://maps.googleapis.com/maps/api/js?key=<%= gmapkey %>&sensor=false" type="text/javascript"></script>
 <script type="text/javascript">
 
     // the place icon
-    var placeicon = new GIcon();
-    placeicon.image = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
-    placeicon.iconSize = new GSize(12, 12);
-    placeicon.iconAnchor = new GPoint(5, 5);
-    placeicon.infoWindowAnchor = new GPoint(9, 2);
-    placeicon.infoShadowAnchor = new GPoint(18, 25);
+    var placeicon = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
 
     // the highlighted place icon
-    var blueicon = new GIcon();
-    blueicon.image = 'http://www.garshol.priv.no/tmphoto/resources/green-dot.gif';
-    blueicon.iconSize = new GSize(12, 12);
-    blueicon.iconAnchor = new GPoint(5, 5);
-    blueicon.infoWindowAnchor = new GPoint(9, 2);
-    blueicon.infoShadowAnchor = new GPoint(18, 25);
+    var blueicon = 'http://www.garshol.priv.no/tmphoto/resources/green-dot.gif';
 
     // opens info window for marker
     function marker_clicked(marker) {
@@ -189,23 +179,35 @@ Photos from <tolog:out var="place"/>
       // when the window is closed
       element = document.getElementById(marker.popupid).cloneNode(true);
       element.style.display = '';
-      map.openInfoWindow(marker.getPoint(), element);
+      infowindow.content = element;
+      infowindow.open(map, marker);
     }
+
+    var infowindow = new google.maps.InfoWindow({ content: '' });
 
     // adds a place marker to the map
     function add_place(x, y, name, popupid, icon) { 
-      marker = new GMarker(new GPoint(x, y), icon);
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(y, x),
+	map: map,
+	title: name,
+	icon: icon
+      });
       marker.popupid = popupid;
-      GEvent.addListener(map, 'click', marker_clicked);
-      map.addOverlay(marker);
+      google.maps.event.addListener(marker, 'click', function() {
+        marker_clicked(marker);
+      });
     }
 
     // creating the map
-    var map = new GMap(document.getElementById('map'));
-    map.addControl(new GSmallMapControl());
-    // doing this here since map is now correctly sized
-    map.centerAndZoom(new GPoint(<tolog:out var="LONG"/>, 
-                                 <tolog:out var="LAT"/>), 12);
+    var map = new google.maps.Map(document.getElementById('map'), {
+      <tolog:if query="ph:latitude(%place%, $LAT),
+                       ph:longitude(%place%, $LONG)?">
+        center: new google.maps.LatLng(<tolog:out var="LAT"/>, 
+                                       <tolog:out var="LONG"/>),
+        zoom: 6
+      </tolog:if>
+    });
 </script>
 <tolog:foreach query="
   instance-of($PLACE, op:Place),
