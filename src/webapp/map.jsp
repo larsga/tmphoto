@@ -22,16 +22,11 @@
 %>
 <div id="map" style="width: 100%; height: 720px"></div>
 
-<script src="http://maps.google.com/maps?file=api&amp;v=1&amp;key=<%= gmapkey %>" type="text/javascript"></script>    
+<script src="http://maps.googleapis.com/maps/api/js?key=<%= gmapkey %>&sensor=false" type="text/javascript"></script>
 <script type="text/javascript">
 
     // the place icon
-    var placeicon = new GIcon();
-    placeicon.image = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
-    placeicon.iconSize = new GSize(16, 16);
-    placeicon.iconAnchor = new GPoint(8, 8);
-    placeicon.infoWindowAnchor = new GPoint(9, 2);
-    placeicon.infoShadowAnchor = new GPoint(18, 25);
+    var placeicon = 'http://www.garshol.priv.no/tmphoto/resources/blue-dot.gif';
 
     // opens info window for marker
     function marker_clicked(marker) {
@@ -41,33 +36,43 @@
       // when the window is closed
       element = document.getElementById(marker.popupid).cloneNode(true);
       element.style.display = '';
-      map.openInfoWindow(marker.getPoint(), element);
+      infowindow.content = element;
+      infowindow.open(map, marker);
     }
+
+    var infowindow = new google.maps.InfoWindow({ content: '' });
 
     // adds a place marker to the map
     function add_place(x, y, name, popupid, icon) { 
-      marker = new GMarker(new GPoint(x, y), icon);
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(y, x),
+	map: map,
+	title: name,
+	icon: icon
+      });
       marker.popupid = popupid;
-      GEvent.addListener(map, 'click', marker_clicked);
-      map.addOverlay(marker);
+      google.maps.event.addListener(marker, 'click', function() {
+        marker_clicked(marker);
+      });
     }
 
     // creating the map
-    var map = new GMap(document.getElementById('map'));
-    map.addControl(new GLargeMapControl());
-    map.addControl(new GScaleControl());
+    var map = new google.maps.Map(document.getElementById('map'), {
     <tolog:choose>
     <tolog:when var="place">
       <tolog:if query="ph:latitude(%place%, $LAT),
                        ph:longitude(%place%, $LONG)?">
-        map.centerAndZoom(new GPoint(<tolog:out var="LONG"/>, 
-                                     <tolog:out var="LAT"/>), 8);
+        center: new google.maps.LatLng(<tolog:out var="LAT"/>, 
+                                       <tolog:out var="LONG"/>),
+        zoom: 15
       </tolog:if>
     </tolog:when>
     <tolog:otherwise>
-      map.centerAndZoom(new GPoint(50, 40), 15);
+      center: new google.maps.LatLng(50, 40),
+      zoom: 2
     </tolog:otherwise>
     </tolog:choose>
+    });
 </script>
 
 
