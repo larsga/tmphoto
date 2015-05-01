@@ -54,7 +54,7 @@
     <echo>Uploading tmphoto jar file...</echo>
     <exec executable="scp">
       <arg value="${build.jars}/tmphoto.jar"/>
-      <arg value="centos5.garshol.virtual.vps-host.net:/opt/tomcat6/webapps/tmphoto/WEB-INF/lib"/>
+      <arg value="larsga@centos5.garshol.virtual.vps-host.net:/opt/tomcat6/webapps/tmphoto/WEB-INF/lib"/>
     </exec>
   </target>
 
@@ -65,7 +65,7 @@
 
     <copy file="doc/README.txt"
           tofile="${build.dist}/README.txt" />
-    
+
     <!-- tagger app -->
     <mkdir dir="${build.dist}/tagger"/>
     <copy todir="${build.dist}/tagger" overwrite="yes">
@@ -114,10 +114,10 @@
     <delete dir="${build.dist}/tmphoto"/>
 
     <!-- package -->
-    <zip destFile="${build.root}/tmphoto.zip" duplicate="preserve"> 
-      <zipfileset dir="${build.root}" 
+    <zip destFile="${build.root}/tmphoto.zip" duplicate="preserve">
+      <zipfileset dir="${build.root}"
         includes="tmphoto/**"/>
     </zip>
-    
+
   </target>
 </project>

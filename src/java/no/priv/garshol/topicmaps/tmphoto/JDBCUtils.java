@@ -93,7 +93,7 @@ public class JDBCUtils {
       }
     }
   }
-  
+
   public static void update(String query) throws SQLException {
     Statement stmt = null;
     try {
@@ -101,8 +101,8 @@ public class JDBCUtils {
       stmt.executeUpdate(query);
     } finally {
       pool.replaceStatement(stmt);
-    }    
-  } 
+    }
+  }
 
   public static String quote(String value) {
     if (value == null)
@@ -134,11 +134,11 @@ public class JDBCUtils {
     }
     return null;
   }
-  
+
   public interface RowMapperIF {
 
     public Object map(ResultSet rs) throws SQLException;
-    
+
   }
 
   /**
@@ -149,7 +149,7 @@ public class JDBCUtils {
     USER = user;
     PASSWORD = password;
   }
-  
+
   private static String JDBCURL;
   private static String USER;
   private static String PASSWORD;
@@ -159,7 +159,7 @@ public class JDBCUtils {
   // all manipulation of the free[] and statements[] arrays (after the
   // constructor) takes place in synchronization blocks.  this ensures
   // that there are no race conditions.
-  
+
   static class ConnectionPool {
     private static final int INITIAL_SIZE      = 0;
     private static final int MAX_SIZE          = 5;
@@ -188,7 +188,7 @@ public class JDBCUtils {
         if (System.currentTimeMillis() - lastrefresh > REFRESH_INTERVAL)
           refresh();
       }
-      
+
       int ix = -1;
       do {
         synchronized (this) {
@@ -224,8 +224,13 @@ public class JDBCUtils {
 
     private int findFreeStatement() {
       for (int ix = 0; ix < count; ix++)
-        if (free[ix])
+        if (free[ix]) {
+          if (!validate(ix)) {
+            close(ix);
+            statements[ix] = createStatement();
+          }
           return ix;
+        }
       return -1;
     }
 
@@ -273,15 +278,9 @@ public class JDBCUtils {
             System.out.println("Statement " + ix + " out for too long");
           else
             System.out.println("Statement " + ix + " broken");
-          
-          try {
-            if (statements[ix] != null) {
-              Connection c = statements[ix].getConnection();
-              statements[ix].close();
-              c.close();
-            } // else nothing to do
-          } catch (SQLException e) {
-          }
+
+          if (statements[ix] != null)
+            close(ix);
           statements[ix] = createStatement();
           lastused[ix] = System.currentTimeMillis();
           free[ix] = true;
@@ -290,12 +289,19 @@ public class JDBCUtils {
       lastrefresh = System.currentTimeMillis();
     }
 
+    private void close(int ix) {
+      try {
+        Connection c = statements[ix].getConnection();
+        statements[ix].close();
+        c.close();
+      } catch (SQLException e) {
+      }
+    }
+
     private boolean validate(int ix) {
       ResultSet rs = null;
       try {
-        Connection c = statements[ix].getConnection();
-        DatabaseMetaData md = c.getMetaData();
-        rs = md.getCatalogs();
+        rs = statements[ix].executeQuery("select 1");
         return true;
       } catch (SQLException e) {
         return false;
