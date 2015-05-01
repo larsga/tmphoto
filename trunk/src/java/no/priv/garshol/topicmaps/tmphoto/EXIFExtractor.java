@@ -27,7 +27,7 @@ public class EXIFExtractor {
       ix = 1;
       showall = true;
     }
-    
+
     for (; ix < argv.length; ix++) {
       System.out.println("---------------------------------------------------------------------------");
       System.out.println("File: " + argv[ix]);
@@ -47,7 +47,7 @@ public class EXIFExtractor {
     } catch (JpegProcessingException e) {
       throw new RuntimeException(e);
     }
-    
+
     Iterator it = m.getDirectoryIterator();
     while (it.hasNext()) {
       Directory d = (Directory) it.next();
