@@ -1,0 +1,25 @@
+# Introduction #
+
+The tmphoto application consists of four major components:
+  * tagger.py - desktop application for tagging photos (Jython, Swing, Ontopia)
+  * tmphoto - web application for browsing photo collections (JSP, Ontopia)
+  * photoserv.py - image server which scales photos on demand (Python, WSGI)
+  * scripts - various scripts for handling routine tasks
+
+This makes the software difficult to set up, and effectively unusable for non-developers. The architecture must therefore be simplified, as described in FutureArchitecture.
+
+# tagger.py #
+
+A desktop Swing application written in Jython based on the OKS. Imports photos from disk, lets the user describe them, and also lets the user edit people, places, events, and categories. Reads the topic map from file and saves it back to XTM.
+
+Requires ImageMagick for rotating photos, and a bundled Java library for reading EXIF data, but is otherwise standalone.
+
+# tmphoto #
+
+The actual browsing application, written in JSP using the OKS. By default it serves not just the browsing interface, but also the photos themselves. It can be configured to use the photo server (see below) instead.
+
+# photoserv.py #
+
+A Python application based on WSGI which reads a simple text file (the index file) that maps from photo IDs to image files on disk. Based on this it scales photos as needed and caches scaled versions on disk. It automagically detects changes to the index file and deletes scaled versions for deleted photos. It also supports the If-modified-since header, which saves quite a bit of HTTP traffic.
+
+Requires ImageMagick for scaling and a bundled Python module for reading EXIF data.

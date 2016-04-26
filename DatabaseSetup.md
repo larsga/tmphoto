@@ -1,0 +1,13 @@
+# Introduction #
+
+In order to have access to voting and comments on photos you need to set up a database. At the moment, only PostgreSQL is supported. Create a database in PostgreSQL (say, tmphoto), then [run the SQL to create the tables](http://code.google.com/p/tmphoto/source/browse/trunk/doc/createdb.sql).
+
+The next step is to go into web.xml and set up the following parameters:
+
+|**Property**|**Value**|
+|:-----------|:--------|
+|jdbcurl     |jdbc:postgresql:tmphoto|
+|jdbcuser    |postgres user name|
+|jdbcpasswd  |postgres password|
+
+Finally, you have to put the PostgreSQL JDBC driver .jar file into tmphoto/WEB-INF/lib.
