@@ -3,8 +3,8 @@
 wsgiref-based photo server.
 """
 
-import os, string, glob, time
-import EXIF
+import os, string, glob, time, threading
+#import EXIF
 
 SIZES = {
     # full is also an alternative, but implemented differently
@@ -14,7 +14,7 @@ SIZES = {
 
 def read_config(file):
     cfg = {}
-    
+
     for line in open(file).readlines():
         if line[0] == "#":
             continue
@@ -79,7 +79,7 @@ class Image:
 
     def get_filename(self):
         return self._filename
-        
+
     def get_last_modified(self):
         return lastmod(self._filename)
 
@@ -87,8 +87,9 @@ class Image:
         assert 0
 
 class Photo(Image):
-    
+
     def get_scaled(self, size, reload):
+        global count
         if size == "full":
             return self._filename
 
@@ -96,13 +97,25 @@ class Photo(Image):
         if not exists(scaled) or lastmod(scaled) < self.get_last_modified() \
            or reload:
             size = SIZES[size]
+
+            while count >= MAX_PROCESSES:
+                time.sleep(0.1)
+
+            countlock.acquire()
+            count += 1
+            countlock.release()
+
             os.system('convert -size %s -resize %s "%s" "%s"' %
                       (size, size, self._filename, scaled))
+
+            countlock.acquire()
+            count -= 1
+            countlock.release()
 
         return scaled
 
 class Video(Image):
-    
+
     def get_scaled(self, size, reload):
         scaled = cachedir + os.sep + size + os.sep + self._id + ".jpg"
         if not exists(scaled) or lastmod(scaled) < self.get_last_modified() \
@@ -113,7 +126,7 @@ class Video(Image):
             os.system(cmd)
 
         return scaled
-    
+
 # --- Horrid EXIF code
 
 def calculate_ratio(value):
@@ -180,7 +193,7 @@ def output_metadata(filename, start_response):
         fields.append(("Flash", decode_flash(data["EXIF Flash"])))
     if data.get("EXIF ExposureTime"):
         fields.append(("Exposure time", str(data["EXIF ExposureTime"])))
-        
+
     if data.get("EXIF ISOSpeedRatings"):
         fields.append(("ISO", str(data["EXIF ISOSpeedRatings"])))
     elif data.get("MakerNote ISO"):
@@ -202,7 +215,7 @@ def output_metadata(filename, start_response):
 
     return ["<table>%s</table>" % string.join(["<tr><td>%s <td>%s" %
                                                pair for pair in fields], "\n")]
-    
+
 # --- Helpers
 
 def lastmod(file):
@@ -249,11 +262,11 @@ def output_photo(photo, size, start_response, reload, environ):
                               ('Last-Modified', t)])
 
     scaled = photo.get_scaled(size, reload)
-    
+
     inf = open(scaled)
     data = inf.read()
     inf.close
-    
+
     return [data]
 
 def photo_app(environ, start_response):
@@ -264,7 +277,7 @@ def photo_app(environ, start_response):
     if not photo:
         start_response("404 Not found", [])
         return ["No such image"]
-    
+
     if size == "metadata":
         return output_metadata(photo.get_filename(), start_response)
     else:
@@ -300,5 +313,17 @@ def main():
 
     print "Giving up"
 
+MAX_PROCESSES = 4
+countlock = threading.Lock()
+count = 0 # number of conversion processes running
+
 if __name__ == "__main__":
     main()
+else:
+    application = photo_app
+    index = Index()
+    for size in SIZES.keys():
+        try:
+            os.mkdir(cachedir + os.sep + size) # make sure the cache directories exist
+        except OSError:
+            pass
