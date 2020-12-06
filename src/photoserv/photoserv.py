@@ -29,6 +29,7 @@ cfg = read_config("photoserv.cfg")
 cachedir = cfg["cachedir"]
 PREFIX = cfg["PREFIX"]
 IXFILE = "index.txt"
+overrides = read_config(cfg.get('overrides'))
 
 # --- Index
 
@@ -257,19 +258,24 @@ def output_photo(photo, size, start_response, reload, environ):
             return [""]
 
     t = time.strftime("%a, %d %b %Y %H:%M:%S GMT", lastmod)
+    scaled = photo.get_scaled(size, reload)
+    return return_photo(scaled, start_response, t)
+
+def return_photo(photofile, start_response, lastmod):
     start_response("200 OK", [('Content-Type', 'image/jpeg'),
                               ('Cache-Control', 'max-age=604800'),
-                              ('Last-Modified', t)])
+                              ('Last-Modified', lastmod)])
 
-    scaled = photo.get_scaled(size, reload)
-
-    inf = open(scaled)
-    data = inf.read()
-    inf.close
-
-    return [data]
+    with open(photofile) as inf:
+        return [inf.read()]
 
 def photo_app(environ, start_response):
+    # this where we override to ensure bad guys get bad calls
+    override = overrides.get(environ.get('HTTP_REFERER'))
+    if override:
+        return return_photo(override, start_response, '')
+
+    # normal processing
     (id, size, reload) = parse_query_string(environ["QUERY_STRING"])
     index.reload()
 
