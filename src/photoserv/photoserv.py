@@ -306,7 +306,8 @@ def main():
             pass
 
     try:
-        from fcgi import WSGIServer
+        # https://www.saddi.com/software/flup/
+        from flup.server.fcgi import WSGIServer
         WSGIServer(photo_app).run()
     except ImportError:
         print "No fcgi"
