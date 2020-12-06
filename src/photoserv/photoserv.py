@@ -28,7 +28,7 @@ def read_config(file):
 cfg = read_config("photoserv.cfg")
 cachedir = cfg["cachedir"]
 PREFIX = cfg["PREFIX"]
-IXFILE = "index.txt"
+IXFILE = cfg['index']
 overrides = read_config(cfg.get('overrides'))
 
 # --- Index
